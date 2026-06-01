@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+:root {
+  --gold: #c9922b;
+  --gold-light: #e0b050;
+  --gold-dim: #8a6010;
+  --bg-dark: #0c0600;
+  --bg-section: #100800;
+  --bg-card: #1a0e00;
+  --text-primary: #f5e6c8;
+  --text-muted: #a08050;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  font-family: 'Noto Serif JP', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  overflow-x: hidden;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  letter-spacing: 0.3em;
+  font-size: 0.75rem;
+  color: var(--gold);
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+}
+
+.section-title::before,
+.section-title::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold));
+}
+
+.section-title::after {
+  background: linear-gradient(to left, transparent, var(--gold));
+}
+
+.gold-divider {
+  width: 60px;
+  height: 1px;
+  background: var(--gold);
+  margin: 0 auto;
+}
+
+/* Cast card hover */
+.cast-card:hover .cast-overlay {
+  opacity: 1;
+}
+
+/* Gallery hover */
+.gallery-item:hover img {
+  transform: scale(1.05);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-dark);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gold-dim);
+  border-radius: 2px;
+}
