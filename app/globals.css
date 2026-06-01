@@ -26,46 +26,90 @@ body {
   overflow-x: hidden;
 }
 
-.section-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  letter-spacing: 0.3em;
-  font-size: 0.75rem;
-  color: var(--gold);
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 400;
+/* Fade-in animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.section-title::before,
-.section-title::after {
-  content: '';
-  display: block;
-  width: 60px;
-  height: 1px;
-  background: linear-gradient(to right, transparent, var(--gold));
+@keyframes shimmer {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.7; }
+  100% { opacity: 0.3; }
 }
 
-.section-title::after {
-  background: linear-gradient(to left, transparent, var(--gold));
+@keyframes scrollBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
 }
 
-.gold-divider {
-  width: 60px;
-  height: 1px;
-  background: var(--gold);
-  margin: 0 auto;
+.animate-fade-in {
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.animate-shimmer {
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.scroll-arrow {
+  animation: scrollBounce 2s ease-in-out infinite;
 }
 
 /* Cast card hover */
-.cast-card:hover .cast-overlay {
-  opacity: 1;
+.cast-card {
+  transition: transform 0.3s ease;
+}
+.cast-card:hover {
+  transform: translateY(-4px);
 }
 
 /* Gallery hover */
-.gallery-item:hover img {
-  transform: scale(1.05);
+.gallery-item > div {
+  transition: transform 0.4s ease;
+}
+.gallery-item:hover > div {
+  transform: scale(1.04);
+}
+
+/* Button glow */
+.btn-outline-gold {
+  transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+.btn-outline-gold:hover {
+  background: rgba(201, 146, 43, 0.12);
+  box-shadow: 0 0 16px rgba(201, 146, 43, 0.25);
+}
+
+/* SNS icon hover */
+.sns-icon {
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+.sns-icon:hover {
+  transform: translateY(-4px);
+  filter: brightness(1.2);
+}
+
+/* Table row hover */
+.price-row {
+  transition: background 0.2s ease;
+}
+.price-row:hover {
+  background: rgba(201, 146, 43, 0.08) !important;
+}
+
+/* Gold CTA button */
+.btn-gold-cta {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-gold-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(201, 146, 43, 0.55) !important;
 }
 
 /* Scrollbar */
