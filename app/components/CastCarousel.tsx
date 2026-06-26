@@ -5,10 +5,14 @@ import { useEffect, useRef } from "react";
 import FallbackImg from "./FallbackImg";
 
 /*
-  キャスト：本人同意のうえ掲載する方針です。
-  ・現在は仮の源氏名・一言＋テスト用のAI生成画像（Rin/Mai/Yua/Nao）です。実在しません。
-  ・本番公開前に必ず実在・本人同意済みキャストの実写真へ差し替えること（景品表示法・風営法対応）。
+  キャスト：本人同意を得た実在キャストのみを掲載する方針です。
+  ・現在の写真は【開発確認用のデモ画像】です（AI生成・実在しません）。
+    Rin/Mai/Yua/Nao にデモ画像を配置、Saki/Emi は未配置でプレースホルダ表示。
+  ・本番公開前に必ず実在・本人同意済みキャストの実写真へ差し替えること
+    （景品表示法・風営法の観点から、実在しない人物を在籍キャストとして掲載しない）。
+    差し替え手順は public/images/cast/README.txt を参照。
   ・写真は public/images/cast/<源氏名小文字>.jpg を置けば表示、無ければプレースホルダ。
+  ・表示名は今回は仮名のまま（Rin/Mai/Yua/Nao/Saki/Emi）。実在の源氏名が決まり次第 CAST 配列で差し替え。
   ・並び順・名前・一言は Desktop 単一HTML版を維持。辞めた方は配列から削除、追加は1件複製。
 */
 type Cast = { name: string; word: string; file: string };
