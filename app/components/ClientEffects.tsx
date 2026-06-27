@@ -16,6 +16,32 @@ export default function ClientEffects() {
       window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches
     );
 
+    // ---- 再読み込み時は前回のスクロール位置を復元せず、必ず最上部から表示 ----
+    // ブラウザの自動復元を切る（reload/戻る進むでの位置復元を無効化）。
+    if ("scrollRestoration" in history) {
+      try {
+        history.scrollRestoration = "manual";
+      } catch {
+        /* 一部環境で代入不可でも無視 */
+      }
+    }
+    // リロード、またはハッシュ無しの通常表示では最上部へ即時スクロール。
+    // （#cast 等のハッシュ付き深いリンクでの新規アクセスは、そのセクションへ飛ぶ挙動を尊重する）
+    const navEntry = (
+      typeof performance !== "undefined" && performance.getEntriesByType
+        ? (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined)
+        : undefined
+    );
+    const isReload = navEntry ? navEntry.type === "reload" : false;
+    if (isReload || !window.location.hash) {
+      // scroll-behavior:smooth の影響でアニメ移動にならないよう、一時的に auto にして即時で戻す
+      const htmlEl = document.documentElement;
+      const prevBehavior = htmlEl.style.scrollBehavior;
+      htmlEl.style.scrollBehavior = "auto";
+      window.scrollTo(0, 0);
+      htmlEl.style.scrollBehavior = prevBehavior;
+    }
+
     // ---- ヘッダー：スクロール40pxで背景付与 ----
     const header = document.getElementById("header");
     const onScroll = () => {

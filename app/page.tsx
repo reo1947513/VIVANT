@@ -9,6 +9,7 @@ import Access from "./components/Access";
 import Reserve from "./components/Reserve";
 import Footer from "./components/Footer";
 import ClientEffects from "./components/ClientEffects";
+import BackToTop from "./components/BackToTop";
 
 /**
  * BAR VIVANT 集客LP（第1段階：見た目の統合）。
@@ -28,8 +29,10 @@ export default function Home() {
       <Access />
       <Reserve />
       <Footer />
-      {/* カルーセル以外のクライアント挙動（reveal・ヒーロー読み込み・ヘッダー・ハンバーガー） */}
+      {/* カルーセル以外のクライアント挙動（reveal・ヒーロー読み込み・ヘッダー・ハンバーガー・リロード時の最上部復帰） */}
       <ClientEffects />
+      {/* トップに戻るボタン（スクロールで右下にフェード表示） */}
+      <BackToTop />
     </>
   );
 }
