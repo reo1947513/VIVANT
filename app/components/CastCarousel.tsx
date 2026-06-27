@@ -6,8 +6,7 @@ import FallbackImg from "./FallbackImg";
 
 /*
   キャスト：本人同意を得た実在キャストのみを掲載する方針です。
-  ・現在の写真は【開発確認用のデモ画像】です（AI生成・実在しません）。
-    Rin/Mai/Yua/Nao にデモ画像を配置、Saki/Emi は未配置でプレースホルダ表示。
+  ・現在の写真は【開発確認用のデモ画像】です（AI生成・実在しません）。全6枠（Rin/Mai/Yua/Nao/Saki/Emi）に配置済み。
   ・本番公開前に必ず実在・本人同意済みキャストの実写真へ差し替えること
     （景品表示法・風営法の観点から、実在しない人物を在籍キャストとして掲載しない）。
     差し替え手順は public/images/cast/README.txt を参照。
@@ -71,8 +70,9 @@ export default function CastCarousel() {
     );
     const loopable = n >= 2;
     let index = loopable ? c : 0; // 最初の実カードの位置
-    const slideDur = reduceMotion ? 0.3 : 0.6; // 秒：reduced motion では短め・控えめに
-    const interval = reduceMotion ? 6000 : 3500; // ms：reduced motion ではゆっくり流す
+    const slideDur = reduceMotion ? 0.3 : 0.9; // 秒：通常は0.9sでより滑らかに（reduced motion は0.3s据え置き）
+    const interval = reduceMotion ? 6000 : 4000; // ms：移動を伸ばしたぶん間隔も4sに（reduced motion は6s据え置き）
+    const EASE = "cubic-bezier(0.22, 0.61, 0.36, 1)"; // 開始・終了が柔らかい ease-out 寄りの曲線
 
     const slotWidth = () => {
       const first = track.children[0] as HTMLElement | undefined;
@@ -90,14 +90,14 @@ export default function CastCarousel() {
       const cw = carousel.getBoundingClientRect().width;
       const x = -(index * sw) + (cw - sw) / 2; // どの slot 幅でも中央カードをビューポート中央に
       if (animate) {
-        track.style.setProperty("transition", "transform " + slideDur + "s ease", "important");
+        track.style.setProperty("transition", "transform " + slideDur + "s " + EASE, "important");
       } else {
         track.style.setProperty("transition", "none", "important");
       }
       track.style.transform = "translateX(" + x + "px)";
       if (!animate) {
         void track.offsetWidth; // リフローを強制してから復帰（瞬間ジャンプを隠す）
-        track.style.setProperty("transition", "transform " + slideDur + "s ease", "important");
+        track.style.setProperty("transition", "transform " + slideDur + "s " + EASE, "important");
       }
       highlight();
     };
@@ -192,6 +192,8 @@ export default function CastCarousel() {
           aria-roledescription="carousel"
           aria-label="在籍キャスト（自動でスライドするカルーセル）"
         >
+          {/* 中央スポットライト（固定の装飾。トラックと一緒には動かず中央に留まる／操作を邪魔しない） */}
+          <div className="cast-spotlight" aria-hidden="true"></div>
           <div className="cast-track" ref={trackRef}>
             {prepend.map((m, i) => (
               <div className="cast-slot" key={`pre-${i}`} aria-hidden="true">

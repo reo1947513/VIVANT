@@ -376,11 +376,31 @@ ul{ list-style:none; }
   position:relative;
   overflow:hidden;
   width:100%;
-  padding:8px 0;
+  padding:38px 0;   /* 上下に余白を取り、中央スポットライトの光が中央カードの上下に柔らかく見えるように */
+}
+/* 中央スポットライト：カルーセル枠(.cast-carousel)に固定する装飾レイヤー。
+   トラックと一緒には動かない＝キャストが光の下を流れて入れ替わる。
+   中央上方からの暖色（テラコッタ〜ほんのり金）放射グラデで、中央のキャストを柔らかく浮かび上がらせる。
+   カードより背面(z-index:0)・操作を邪魔しない(pointer-events:none)・顔は白飛びさせない。 */
+.cast-spotlight{
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:50%;
+  width:62%;
+  transform:translateX(-50%);
+  pointer-events:none;
+  z-index:0;
+  background:radial-gradient(46% 64% at 50% 16%,
+    rgba(224,125,44,0.26) 0%,
+    rgba(214,112,34,0.13) 40%,
+    rgba(207,106,30,0) 74%);
 }
 .cast-track{
+  position:relative;   /* スポットライト(z-index:0)より前面に */
+  z-index:1;
   display:flex;
-  transition:transform .6s ease;
+  transition:transform .9s cubic-bezier(0.22, 0.61, 0.36, 1);
   will-change:transform;
 }
 .cast-slot{
