@@ -1,6 +1,9 @@
+import { shop } from "../data/siteData";
+
 /**
  * RESERVE / CONTACT：電話予約と SNS/LINE 予約を左右2カラム。
  * LINE/予約フォームは未提供のため「準備中」の仮置き。電話は tel: でタップ発信。
+ * 電話・営業時間・定休・TikTok URL は app/data/siteData.ts に一元管理。
  */
 export default function Reserve() {
   return (
@@ -16,10 +19,12 @@ export default function Reserve() {
           <div className="reserve-card reveal">
             <div className="rlabel">BY PHONE</div>
             <div className="rja">お電話でのご予約</div>
-            <a className="rtel" href="tel:0666908636">
-              06-6690-8636
+            <a className="rtel" href={`tel:${shop.tel.link}`}>
+              {shop.tel.display}
             </a>
-            <div className="rhours">受付：20:00 〜 翌5:00（月曜定休）</div>
+            <div className="rhours">
+              受付：{shop.hours.range}（{shop.closed}定休）
+            </div>
           </div>
 
           <div className="reserve-card reveal">
@@ -28,7 +33,7 @@ export default function Reserve() {
             {/* TikTok（実URL反映済み）。LINE/予約フォームは未提供のため下記は仮置き（準備中） */}
             <a
               className="btn btn-primary"
-              href="https://www.tiktok.com/@bar.vivant"
+              href={shop.tiktokUrl}
               target="_blank"
               rel="noopener"
             >

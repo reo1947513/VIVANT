@@ -1,17 +1,16 @@
+import { shop } from "../data/siteData";
+
 /**
  * 固定ヘッダー＋モバイルメニュー（静的マークアップ）。
  * スクロール時の背景付与・ハンバーガー開閉は ClientEffects が id 経由で配線する。
+ * 店名は app/data/siteData.ts から参照（表記ゆれ防止）。
  */
 export default function Header() {
   return (
     <>
       <header className="header" id="header">
         <div className="wrap">
-          <a
-            className="brand"
-            href="#top"
-            aria-label="BAR VIVANT（バー ヴィヴァン） トップへ"
-          >
+          <a className="brand" href="#top" aria-label={`${shop.nameFull} トップへ`}>
             <span className="logo logo--header"></span>
           </a>
 

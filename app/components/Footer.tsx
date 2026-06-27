@@ -1,9 +1,11 @@
-/** フッター：ロゴ・フッターナビ・住所・電話・コピーライト。 */
+import { shop, copyright } from "../data/siteData";
+
+/** フッター：ロゴ・フッターナビ・住所・電話・コピーライト。店舗情報は app/data/siteData.ts 参照。 */
 export default function Footer() {
   return (
     <footer className="footer">
       <div className="wrap">
-        <span className="logo logo--footer" role="img" aria-label="BAR VIVANT"></span>
+        <span className="logo logo--footer" role="img" aria-label={shop.nameEn}></span>
         <nav className="footer-nav">
           <a href="#top">TOP</a>
           <a href="#concept">CONCEPT</a>
@@ -13,11 +15,11 @@ export default function Footer() {
           <a href="#access">ACCESS</a>
         </nav>
         <p className="f-meta">
-          〒530-0002 大阪府大阪市北区曽根崎新地1丁目5-15 シャンテ北新地 1階
+          〒{shop.address.postal} {shop.address.line1} {shop.address.line2}
           <br />
-          TEL 06-6690-8636 ／ 20:00 〜 翌5:00（火〜日・月曜定休）
+          TEL {shop.tel.display} ／ {shop.hours.range}（{shop.hours.daysNote}・{shop.closed}定休）
         </p>
-        <p className="copy">© 2026 BAR VIVANT. ALL RIGHTS RESERVED.</p>
+        <p className="copy">{copyright}</p>
       </div>
     </footer>
   );
