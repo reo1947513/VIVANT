@@ -1,3 +1,15 @@
+> ## ⚠ 公開ステータス：仮公開中（要差し替え）
+>
+> BAR VIVANT LP は本番（`vivant-kappa.vercel.app` / `main`）に **仮公開中** です。本公開は実写真が揃い次第。
+>
+> - **キャスト写真**：開発確認用の **デモ画像（AI生成・実在しません）**。本番前に実在・本人同意済みの実写真へ差し替え必須。
+> - **キャストの一言**：仮公開中は **表示オフ**（`app/components/CastCarousel.tsx` の `TEMP_HIDE_CWORD = true`）。
+> - **検索インデックス**：**noindex, nofollow** を設定中（`app/layout.tsx` の `metadata.robots`）。
+> - **未完了（＝本公開時にやること）**：①実写真へ差し替え ②`TEMP_HIDE_CWORD` を `false` に ③`metadata.robots` の noindex を解除。
+> - 詳細・手順：`public/images/cast/README.txt` を参照。
+>
+> 出勤情報・ブログ・キャストログイン（Supabase連携）は次段階で実装予定。
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

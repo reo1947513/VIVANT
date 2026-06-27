@@ -26,6 +26,11 @@ const CAST: Cast[] = [
   { name: "Emi", word: "またお話したいな。", file: "emi" },
 ];
 
+// 【仮公開中の一時設定】デモ画像のため、各キャストの「一言」は表示オフにしています。
+// word データは CAST 配列に保持しているので、本公開（実写真へ差し替え）時にこのフラグを
+// false に戻すだけで、実在キャストの一言を再表示できます。
+const TEMP_HIDE_CWORD: boolean = true; // ← 本公開時に false に戻す（実写真差し替えとセット）
+
 function CastCard({ c }: { c: Cast }) {
   return (
     <article className="cast-card">
@@ -39,7 +44,8 @@ function CastCard({ c }: { c: Cast }) {
       <div className="cast-info">
         <div className="cname">{c.name}</div>
         <div className="clabel">CAST</div>
-        <div className="cword">{c.word}</div>
+        {/* 仮公開中は一言を表示オフ（TEMP_HIDE_CWORD）。本公開時に false へ戻すと再表示 */}
+        {!TEMP_HIDE_CWORD && <div className="cword">{c.word}</div>}
       </div>
     </article>
   );
