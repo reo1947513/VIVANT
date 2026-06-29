@@ -226,6 +226,20 @@ ul{ list-style:none; }
   align-items:center;          /* .wrap を縦方向中央に */
   padding-top:var(--header-h);
   position:relative;
+  /* 新デザイン第1段階：金色の光の背景（ヒーロー限定。他セクションは変更しない）。
+     生成画像のとおり明るい光は右・暗部は左の向きをそのまま使う（反転しない）。
+     文字が乗る左〜中央だけを暗くする最小限のグラデーションを上に重ね、可読性を確保しつつ
+     右側の金色の光は残す。装飾（縁取り・発光・文字強調）は次段階。 */
+  background-image:
+    linear-gradient(100deg,
+      rgba(16,11,7,0.82) 0%,
+      rgba(16,11,7,0.55) 32%,
+      rgba(16,11,7,0.20) 58%,
+      rgba(16,11,7,0) 78%),
+    url('/images/hero-bg.jpg');
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
 }
 /* 横方向の中央寄せ・最大幅・2カラム化はすべて内側の .hero .wrap が担う
    （他セクションと同じ .wrap コンテナを使い、左端を揃える） */
