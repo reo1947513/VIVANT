@@ -1,8 +1,9 @@
 import FallbackImg from "./FallbackImg";
+import { shop } from "../data/siteData";
 
 /**
  * GALLERY：店内写真グリッド（4列）。/images/gallery/01.jpg〜08.jpg を置けば表示、
- * 無ければプレースホルダのまま。下に TikTok 誘導ボタン。
+ * 無ければプレースホルダのまま。下に TikTok 誘導ボタン。TikTok URL は app/data/siteData.ts 参照。
  */
 const ITEMS = [1, 2, 3, 4, 5, 6, 7, 8];
 
@@ -23,7 +24,7 @@ export default function Gallery() {
                 <FallbackImg
                   className="ph-img"
                   src={`/images/gallery/${nn}.jpg`}
-                  alt={`BAR VIVANT 店内 ${n}`}
+                  alt={`${shop.nameEn} 店内 ${n}`}
                 />
               </div>
             );
@@ -33,7 +34,7 @@ export default function Gallery() {
         <div className="sns-cta reveal">
           <a
             className="btn-sns"
-            href="https://www.tiktok.com/@bar.vivant"
+            href={shop.tiktokUrl}
             target="_blank"
             rel="noopener"
           >

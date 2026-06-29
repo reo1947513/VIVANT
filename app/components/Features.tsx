@@ -1,4 +1,6 @@
-/** FEATURES：4カラムのアイコン＋見出し＋説明。線画 SVG。文言は Desktop 版を維持。 */
+import { features } from "../data/siteData";
+
+/** FEATURES：4カラムのアイコン＋見出し＋説明。線画 SVG。見出し・説明文は app/data/siteData.ts に一元管理。 */
 export default function Features() {
   return (
     <section className="section section--alt" id="features">
@@ -16,11 +18,11 @@ export default function Features() {
                 <path d="M7 18h34M14 10V6M34 10V6" />
               </svg>
             </div>
-            <h3>上質な空間</h3>
+            <h3>{features[0].title}</h3>
             <p>
-              落ち着いた照明と静かな音楽。
+              {features[0].lines[0]}
               <br />
-              北新地の隠れ家でくつろぐ夜を。
+              {features[0].lines[1]}
             </p>
           </div>
           <div className="feature reveal">
@@ -30,11 +32,11 @@ export default function Features() {
                 <path d="M24 36v4M18 40h12" />
               </svg>
             </div>
-            <h3>厳選されたお酒</h3>
+            <h3>{features[1].title}</h3>
             <p>
-              定番から銘酒・シャンパンまで。
+              {features[1].lines[0]}
               <br />
-              その日の気分に合う一杯を。
+              {features[1].lines[1]}
             </p>
           </div>
           <div className="feature reveal">
@@ -43,11 +45,11 @@ export default function Features() {
                 <path d="M24 39s-13-8-13-18a8 8 0 0 1 13-6 8 8 0 0 1 13 6c0 10-13 18-13 18Z" />
               </svg>
             </div>
-            <h3>心地よいおもてなし</h3>
+            <h3>{features[2].title}</h3>
             <p>
-              気取らない接客で、
+              {features[2].lines[0]}
               <br />
-              初めての方も安心です。
+              {features[2].lines[1]}
             </p>
           </div>
           <div className="feature reveal">
@@ -57,11 +59,11 @@ export default function Features() {
                 <path d="M24 15v18M20 20h6a3 3 0 0 1 0 6h-4a3 3 0 0 0 0 6h6" />
               </svg>
             </div>
-            <h3>明朗な料金</h3>
+            <h3>{features[3].title}</h3>
             <p>
-              初回3,000円からの分かりやすい料金。
+              {features[3].lines[0]}
               <br />
-              安心してお過ごしいただけます。
+              {features[3].lines[1]}
             </p>
           </div>
         </div>

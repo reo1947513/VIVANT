@@ -1,4 +1,6 @@
-/** CONCEPT：中央寄せ＋左右のぼかし煙。文言は Desktop 版を維持。 */
+import { concept } from "../data/siteData";
+
+/** CONCEPT：中央寄せ＋左右のぼかし煙。文言は app/data/siteData.ts に一元管理。 */
 export default function Concept() {
   return (
     <section className="section concept" id="concept">
@@ -11,9 +13,9 @@ export default function Concept() {
           <span className="rule"></span>
         </div>
         <div className="concept-body reveal">
-          <p>日常を離れ、上質な時間に浸る大人のための隠れ家。</p>
-          <p>落ち着いた空間と、心をほどくおもてなしで、</p>
-          <p>ゆったりとした夜の時間をお迎えします。</p>
+          {concept.lines.map((line, i) => (
+            <p key={i}>{line}</p>
+          ))}
         </div>
       </div>
     </section>

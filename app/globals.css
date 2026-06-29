@@ -376,11 +376,31 @@ ul{ list-style:none; }
   position:relative;
   overflow:hidden;
   width:100%;
-  padding:8px 0;
+  padding:38px 0;   /* 上下に余白を取り、中央スポットライトの光が中央カードの上下に柔らかく見えるように */
+}
+/* 中央スポットライト：カルーセル枠(.cast-carousel)に固定する装飾レイヤー。
+   トラックと一緒には動かない＝キャストが光の下を流れて入れ替わる。
+   中央上方からの暖色（テラコッタ〜ほんのり金）放射グラデで、中央のキャストを柔らかく浮かび上がらせる。
+   カードより背面(z-index:0)・操作を邪魔しない(pointer-events:none)・顔は白飛びさせない。 */
+.cast-spotlight{
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:50%;
+  width:62%;
+  transform:translateX(-50%);
+  pointer-events:none;
+  z-index:0;
+  background:radial-gradient(46% 64% at 50% 16%,
+    rgba(224,125,44,0.26) 0%,
+    rgba(214,112,34,0.13) 40%,
+    rgba(207,106,30,0) 74%);
 }
 .cast-track{
+  position:relative;   /* スポットライト(z-index:0)より前面に */
+  z-index:1;
   display:flex;
-  transition:transform .6s ease;
+  transition:transform .9s cubic-bezier(0.22, 0.61, 0.36, 1);
   will-change:transform;
 }
 .cast-slot{
@@ -410,6 +430,18 @@ ul{ list-style:none; }
   aspect-ratio:3/4;
   background:linear-gradient(160deg, #2a1c12, #19110b);
   position:relative;
+}
+/* キャスト写真の長押し保存・ドラッグ移動・選択を抑制（対象は画像に限定）。
+   一般利用者のうっかり保存/移動を防ぐ範囲の対策で、完全な保存防止ではない。
+   スワイプ操作やボタン・テキスト選択は妨げない（img以外には適用しない）。 */
+.cast-photo,
+.cast-photo .ph-img{
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+}
+.cast-photo .ph-img{
+  -webkit-user-drag:none;
 }
 .cast-photo::after{
   content:"PHOTO";
@@ -717,9 +749,50 @@ ul{ list-style:none; }
 @media (max-width:600px){
   .reserve-grid{ grid-template-columns:1fr; }
 }
+/* トップに戻るボタン：右下固定・テラコッタ基調の控えめな円形。
+   スクロールで .is-visible が付くとフェード表示。ヘッダー(z-index:100)・モバイルナビ(99)より
+   下、本文より上(z-index:90)に置き、操作の邪魔をしない。reduced motion 時はフェードが無効化され即時表示。 */
+.to-top{
+  position:fixed;
+  right:22px;
+  bottom:22px;
+  z-index:90;
+  width:46px;
+  height:46px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  border:1px solid var(--orange-line);
+  background:rgba(32,22,15,0.82);
+  color:var(--orange-bright);
+  cursor:pointer;
+  opacity:0;
+  transform:translateY(10px);
+  pointer-events:none;   /* 非表示時は押せない（フェード中の誤操作防止） */
+  -webkit-backdrop-filter:blur(4px);
+  backdrop-filter:blur(4px);
+  transition:opacity .4s ease, transform .4s ease,
+             background .25s ease, border-color .25s ease, color .25s ease;
+}
+.to-top.is-visible{
+  opacity:1;
+  transform:translateY(0);
+  pointer-events:auto;
+}
+.to-top:hover{
+  background:var(--orange);
+  border-color:var(--orange);
+  color:var(--ink);
+}
+.to-top svg{ width:22px; height:22px; display:block; }
+
 @media (max-width:520px){
   .cast-slot{ flex-basis:66%; }   /* モバイル：中央を大きく、左右は端だけ覗かせる peek 表示 */
   .wrap{ padding:0 20px; }
+  /* スマホは親指で押しやすいよう少し大きめ・端から少し内側に */
+  .to-top{ right:16px; bottom:16px; width:50px; height:50px; }
+  .to-top svg{ width:24px; height:24px; }
 }
 
 /* モーションを抑える設定の環境では即時表示 */

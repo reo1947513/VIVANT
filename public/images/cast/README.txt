@@ -1,6 +1,6 @@
 ==============================================================
 【現在の状態】本番（vivant-kappa.vercel.app）に「仮公開中」です。
-  - キャスト写真：デモ画像（AI生成・実在しません）※rin/mai/yua/nao。saki/emiはプレースホルダ
+  - キャスト写真：全6枠（rin/mai/yua/nao/saki/emi）にデモ画像（AI生成・実在しません）を配置済み
   - キャストの「一言」：仮公開中は表示オフ（CastCarousel.tsx の TEMP_HIDE_CWORD=true）
   - 検索インデックス：noindex, nofollow を設定中（app/layout.tsx の metadata.robots）
   - 未完了：実写真への差し替え／一言の再表示／noindex の解除（＝本公開）
@@ -14,8 +14,7 @@
 【重要・必読】キャスト写真について（BAR VIVANT）
 
 ■ 現在の状態：開発確認用のデモ画像です（本番公開用の実写真ではありません）
-  - rin.jpg / mai.jpg / yua.jpg / nao.jpg … AI生成のデモ画像（実在しません）
-  - saki.jpg / emi.jpg … 未配置（サイト上はプレースホルダ表示）
+  - rin.jpg / mai.jpg / yua.jpg / nao.jpg / saki.jpg / emi.jpg … AI生成のデモ画像（実在しません）※全6枠配置済み
 
 ■ 本番公開前に必ず差し替えること
   - これらは仮のデモ画像です。本番公開前に、実在・本人同意済みのキャストの実写真へ
