@@ -331,6 +331,14 @@ ul{ list-style:none; }
   color:var(--ink-faint);
   font-size:.8rem; letter-spacing:.2em;
 }
+/* 写真ファイルが存在しない場合（サーバー側の判定で hero-photo--empty が付く）は
+   ギャラリー・キャストと表記を揃えて「NO IMAGE」と明示する。
+   詳細度が同じため、必ず .hero-photo::after より後ろに置くこと（後勝ちで上書きする）。 */
+.hero-photo--empty::after{
+  content:"NO IMAGE";
+  font-family:var(--font-roman);
+  font-size:.7rem; letter-spacing:.25em;
+}
 
 
 /* ヒーロー読み込みフェードアップ（時間差） */
@@ -479,6 +487,10 @@ ul{ list-style:none; }
   font-family:var(--font-roman);
   font-size:.7rem; letter-spacing:.25em;
 }
+/* 写真ファイルが存在しない枠（サーバー側の判定で cast-photo--empty が付く）は
+   「NO IMAGE」と明示する。ギャラリーの .ph--empty と同じ考え方。
+   詳細度が同じため、必ず .cast-photo::after より後ろに置くこと（後勝ちで上書きする）。 */
+.cast-photo--empty::after{ content:"NO IMAGE"; }
 .cast-info{ padding:14px 12px 16px; text-align:center; }
 .cast-info .cname{
   font-family:var(--font-roman);
@@ -625,6 +637,9 @@ ul{ list-style:none; }
   font-family:var(--font-roman);
   font-size:.7rem; letter-spacing:.25em;
 }
+/* 画像ファイルが存在しない枠（サーバー側の判定で .ph--empty が付く）は、
+   写真待ちであることが伝わるよう「NO IMAGE」と明示する。 */
+.gallery-grid .ph--empty::after{ content:"NO IMAGE"; }
 
 /* ===================== ACCESS ===================== */
 .access-grid{

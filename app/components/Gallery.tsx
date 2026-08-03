@@ -1,9 +1,15 @@
-import FallbackImg from "./FallbackImg";
+/* eslint-disable @next/next/no-img-element */
 import { shop } from "../data/siteData";
+import { publicFileExists } from "../lib/publicImage";
 
 /**
  * GALLERY：店内写真グリッド（4列）。/images/gallery/01.jpg〜08.jpg を置けば表示、
- * 無ければプレースホルダのまま。下に TikTok 誘導ボタン。TikTok URL は app/data/siteData.ts 参照。
+ * 無ければ「NO IMAGE」のプレースホルダを表示する。下に TikTok 誘導ボタン。
+ * TikTok URL は app/data/siteData.ts 参照。
+ *
+ * 画像の有無はサーバー側（このコンポーネントの描画時）に public/ を見て判定する。
+ * 以前はブラウザの読み込み失敗を待って隠す方式だったが、失敗の合図を取りこぼすと
+ * 壊れた画像アイコンと代替テキストがそのまま残るため、出し分け自体をサーバー側へ移した。
  */
 const ITEMS = [1, 2, 3, 4, 5, 6, 7, 8];
 
@@ -19,13 +25,20 @@ export default function Gallery() {
         <div className="gallery-grid">
           {ITEMS.map((n) => {
             const nn = String(n).padStart(2, "0");
+            const src = `/images/gallery/${nn}.jpg`;
+            const exists = publicFileExists(src);
             return (
-              <div className="ph reveal" key={nn}>
-                <FallbackImg
-                  className="ph-img"
-                  src={`/images/gallery/${nn}.jpg`}
-                  alt={`${shop.nameEn} 店内 ${n}`}
-                />
+              <div
+                className={exists ? "ph reveal" : "ph ph--empty reveal"}
+                key={nn}
+              >
+                {exists && (
+                  <img
+                    className="ph-img"
+                    src={src}
+                    alt={`${shop.nameEn} 店内 ${n}`}
+                  />
+                )}
               </div>
             );
           })}
