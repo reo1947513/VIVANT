@@ -1,5 +1,6 @@
-import FallbackImg from "./FallbackImg";
+/* eslint-disable @next/next/no-img-element */
 import { shop } from "../data/siteData";
+import { publicFileExists } from "../lib/publicImage";
 
 /**
  * ヒーロー。左にロゴ・コピー・CTA、右に店内メイン写真（4:3 横長・cover 中央）。
@@ -7,7 +8,11 @@ import { shop } from "../data/siteData";
  * 横幅・左端揃え・4:3 写真・縦積み時の上端対応は globals.css 側で再現。
  * 店名・TikTok URL は app/data/siteData.ts から参照。
  */
+const HERO_PHOTO = "/images/hero.jpg";
+
 export default function Hero() {
+  const heroPhotoExists = publicFileExists(HERO_PHOTO);
+
   return (
     <section className="hero" id="top">
       <div className="wrap">
@@ -43,9 +48,12 @@ export default function Hero() {
         </div>
 
         <div className="hero-right hero-anim d5">
-          {/* 店内メイン写真：/images/hero.jpg を置けば表示／無ければプレースホルダ */}
-          <div className="hero-photo">
-            <FallbackImg className="ph-img" src="/images/hero.jpg" alt={`${shop.nameEn} 店内`} />
+          {/* 店内メイン写真：/images/hero.jpg を置けば表示／無ければ「NO IMAGE」表示。
+              有無の判定はサーバー側（publicFileExists）で行い、ギャラリー・キャストと方式を揃えている。 */}
+          <div className={heroPhotoExists ? "hero-photo" : "hero-photo hero-photo--empty"}>
+            {heroPhotoExists && (
+              <img className="ph-img" src={HERO_PHOTO} alt={`${shop.nameEn} 店内`} />
+            )}
           </div>
         </div>
       </div>

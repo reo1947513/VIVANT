@@ -2,8 +2,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import FallbackImg from "./FallbackImg";
 import { shop } from "../data/siteData";
+import { castPhotoSrc, type CastWithPhoto } from "../data/cast";
 
 /*
   キャスト：本人同意を得た実在キャストのみを掲載する方針です。
@@ -11,35 +11,30 @@ import { shop } from "../data/siteData";
   ・本番公開前に必ず実在・本人同意済みキャストの実写真へ差し替えること
     （景品表示法・風営法の観点から、実在しない人物を在籍キャストとして掲載しない）。
     差し替え手順は public/images/cast/README.txt を参照。
-  ・写真は public/images/cast/<源氏名小文字>.jpg を置けば表示、無ければプレースホルダ。
-  ・表示名は今回は仮名のまま（Rin/Mai/Yua/Nao/Saki/Emi）。実在の源氏名が決まり次第 CAST 配列で差し替え。
-  ・並び順・名前・一言は Desktop 単一HTML版を維持。辞めた方は配列から削除、追加は1件複製。
+  ・キャストの一覧（名前・一言・ファイル名）は app/data/cast.ts に移動した。
+    写真ファイルが実在するかどうかはサーバー側（page.tsx）で判定し、hasPhoto として受け取る。
+    ブラウザの読み込み失敗を待って隠す方式は、失敗の合図を取りこぼすと壊れた画像アイコンと
+    代替テキストが残るため採用しない（ギャラリーで実際に発生したため方式を統一した）。
+  ・写真が無い枠は画像要素そのものを出さず、「NO IMAGE」のプレースホルダを表示する。
 */
-type Cast = { name: string; word: string; file: string };
-
-const CAST: Cast[] = [
-  { name: "Rin", word: "よろしくね。", file: "rin" },
-  { name: "Mai", word: "乾杯しましょ。", file: "mai" },
-  { name: "Yua", word: "ゆっくりどうぞ。", file: "yua" },
-  { name: "Nao", word: "お待ちしてます。", file: "nao" },
-  { name: "Saki", word: "楽しみましょう。", file: "saki" },
-  { name: "Emi", word: "またお話したいな。", file: "emi" },
-];
 
 // 【仮公開中の一時設定】デモ画像のため、各キャストの「一言」は表示オフにしています。
 // word データは CAST 配列に保持しているので、本公開（実写真へ差し替え）時にこのフラグを
 // false に戻すだけで、実在キャストの一言を再表示できます。
 const TEMP_HIDE_CWORD: boolean = true; // ← 本公開時に false に戻す（実写真差し替えとセット）
 
-function CastCard({ c }: { c: Cast }) {
+function CastCard({ c }: { c: CastWithPhoto }) {
   return (
     <article className="cast-card">
-      <div className="cast-photo">
-        <FallbackImg
-          className="ph-img"
-          src={`/images/cast/${c.file}.jpg`}
-          alt={`BAR VIVANT キャスト ${c.name}`}
-        />
+      {/* 写真が無い枠は img を出さず、CSS 側で「NO IMAGE」を表示する（cast-photo--empty） */}
+      <div className={c.hasPhoto ? "cast-photo" : "cast-photo cast-photo--empty"}>
+        {c.hasPhoto && (
+          <img
+            className="ph-img"
+            src={castPhotoSrc(c.file)}
+            alt={`BAR VIVANT キャスト ${c.name}`}
+          />
+        )}
       </div>
       <div className="cast-info">
         <div className="cname">{c.name}</div>
@@ -51,15 +46,16 @@ function CastCard({ c }: { c: Cast }) {
   );
 }
 
-export default function CastCarousel() {
+/** cast：キャスト一覧に「写真が実在するか（hasPhoto）」を添えたもの。page.tsx がサーバー側で判定して渡す。 */
+export default function CastCarousel({ cast }: { cast: CastWithPhoto[] }) {
   const carouselRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
   // クローン枚数は枚数から算出（最大3／繋ぎ目の左右ピークを満たす）。クローンは JSX で宣言的に描画する。
-  const n = CAST.length;
+  const n = cast.length;
   const c = Math.min(n, 3);
-  const prepend = CAST.slice(n - c); // 末尾 c 枚（先頭に置く）
-  const append = CAST.slice(0, c); // 先頭 c 枚（末尾に置く）
+  const prepend = cast.slice(n - c); // 末尾 c 枚（先頭に置く）
+  const append = cast.slice(0, c); // 先頭 c 枚（末尾に置く）
 
   useEffect(() => {
     const carousel = carouselRef.current;
@@ -376,7 +372,7 @@ export default function CastCarousel() {
                 <CastCard c={m} />
               </div>
             ))}
-            {CAST.map((m, i) => (
+            {cast.map((m, i) => (
               <div className="cast-slot" key={`o-${i}`}>
                 <CastCard c={m} />
               </div>

@@ -10,6 +10,8 @@ import Reserve from "./components/Reserve";
 import Footer from "./components/Footer";
 import ClientEffects from "./components/ClientEffects";
 import BackToTop from "./components/BackToTop";
+import { CAST, castPhotoSrc } from "./data/cast";
+import { publicFileExists } from "./lib/publicImage";
 
 /**
  * BAR VIVANT 集客LP（第1段階：見た目の統合）。
@@ -17,13 +19,21 @@ import BackToTop from "./components/BackToTop";
  * 出勤情報・ブログ・キャストログイン等の Supabase 連携は第2段階以降で本ページに載せる。
  */
 export default function Home() {
+  // キャスト写真が実在するかはここ（サーバー側）で判定して渡す。
+  // ブラウザの読み込み失敗に任せると、失敗の合図を取りこぼしたときに壊れた画像アイコンと
+  // 代替テキストが残るため、ギャラリーと同じくサーバー側で出し分ける方式に統一している。
+  const cast = CAST.map((c) => ({
+    ...c,
+    hasPhoto: publicFileExists(castPhotoSrc(c.file)),
+  }));
+
   return (
     <>
       <Header />
       <Hero />
       <Concept />
       <Features />
-      <CastCarousel />
+      <CastCarousel cast={cast} />
       <System />
       <Gallery />
       <Access />
