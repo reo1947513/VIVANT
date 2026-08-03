@@ -32,6 +32,8 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# 値を含まない雛形だけは追跡する（設定すべき変数名の一覧として使う）
+!.env.example
 
 # vercel
 .vercel

@@ -21,6 +21,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # 型チェックとビルドをここで行う。実際の公開は Vercel 側のビルドで行われるため、
+      # ここを通さないと型エラーやビルドエラーが本番ビルドまで発覚しない。
+      # 環境変数は意図的に渡していない。Supabase の接続情報が無くてもビルドが通る
+      # 作りになっているかを、ここで継続的に確かめる意味がある。
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+
       - name: Check Vercel token
         id: token
         run: |
