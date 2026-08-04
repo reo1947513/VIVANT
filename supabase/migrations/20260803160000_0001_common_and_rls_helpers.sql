@@ -60,9 +60,11 @@ as $$
 $$;
 
 -- 管理者メールの登録。
--- 【要編集】下の 'ここに管理者のメールアドレス' を、Supabase の Authentication → Users で
--- 作成したユーザーのメールアドレスに置き換えてから実行すること。
--- アプリ側の環境変数 ADMIN_EMAIL とも一致させる。
+-- ここに書いたアドレスが、管理画面にログインできる唯一のアドレスになる。
+-- Supabase の Authentication → Users で作成するユーザーのメールと、
+-- アプリ側の環境変数 ADMIN_EMAIL の3つを必ず一致させること。
+-- 管理者を変えるときは、この表に新しいアドレスを入れて古いものを消す
+-- （SQLファイルを書き直す必要はない）。
 insert into public.admin_emails (email)
-values ('ここに管理者のメールアドレス')
+values ('conestkawakami@gmail.com')
 on conflict (email) do nothing;
