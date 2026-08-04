@@ -1,0 +1,222 @@
+/*
+  管理画面のスタイル。
+
+  注意（必読）：
+    app/globals.css はサイト全体に読み込まれるため、管理画面にも LP の暗色テーマが効く。
+    具体的には body の背景が濃い茶色・文字が生成り色、箇条書きの記号が消え、
+    余白がすべて0になっている。何もしないと黒背景に黒文字のフォームができあがる。
+    そのため、この shell で明示的に打ち消す。
+  また、管理画面の中では .section / .wrap / .ph といった LP 側のクラス名を使わないこと
+  （同名のスタイルが当たって崩れる）。
+*/
+
+.shell {
+  min-height: 100dvh;
+  background: #f6f7f9;
+  color: #1c2024;
+  font-family: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", sans-serif;
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+.shell ul,
+.shell ol {
+  list-style: revert;
+}
+
+/* ------------------------------ ヘッダー ------------------------------ */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 24px;
+  background: #fff;
+  border-bottom: 1px solid #e3e6ea;
+}
+.brand {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.brandSub {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: #6b7280;
+  letter-spacing: 0.08em;
+}
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* ------------------------------ ナビ ------------------------------ */
+.nav {
+  display: flex;
+  gap: 4px;
+  padding: 0 24px;
+  background: #fff;
+  border-bottom: 1px solid #e3e6ea;
+  overflow-x: auto;
+}
+.navLink {
+  display: block;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #4b5563;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.navLink:hover {
+  color: #111827;
+}
+.navLinkActive {
+  color: #b45309;
+  border-bottom-color: #b45309;
+  font-weight: 600;
+}
+
+/* ------------------------------ 本文 ------------------------------ */
+.main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 28px 24px 64px;
+}
+.pageTitle {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.pageNote {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+.card {
+  background: #fff;
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+  padding: 24px;
+}
+
+/* ------------------------------ ログイン ------------------------------ */
+.loginWrap {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.loginCard {
+  width: 100%;
+  max-width: 380px;
+  background: #fff;
+  border: 1px solid #e3e6ea;
+  border-radius: 10px;
+  padding: 32px 28px;
+}
+.loginTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.loginNote {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 22px;
+}
+
+/* ------------------------------ フォーム ------------------------------ */
+.field {
+  display: block;
+  margin-bottom: 16px;
+}
+.label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 15px;
+  font-family: inherit;
+  color: #1c2024;
+  background: #fff;
+  border: 1px solid #cbd2d9;
+  border-radius: 6px;
+}
+.input:focus {
+  outline: 2px solid #b45309;
+  outline-offset: 1px;
+  border-color: #b45309;
+}
+
+/* ------------------------------ ボタン ------------------------------ */
+.btnPrimary,
+.btnSecondary,
+.btnDanger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.btnPrimary {
+  width: 100%;
+  background: #b45309;
+  color: #fff;
+}
+.btnPrimary:hover {
+  background: #92400e;
+}
+.btnPrimary:disabled {
+  background: #d6a068;
+  cursor: not-allowed;
+}
+.btnSecondary {
+  background: #fff;
+  color: #374151;
+  border-color: #cbd2d9;
+}
+.btnSecondary:hover {
+  background: #f3f4f6;
+}
+.btnDanger {
+  background: #fff;
+  color: #b91c1c;
+  border-color: #f0c2c2;
+}
+.btnDanger:hover {
+  background: #fef2f2;
+}
+
+/* ------------------------------ 通知 ------------------------------ */
+.alertError {
+  background: #fef2f2;
+  border: 1px solid #f0c2c2;
+  color: #991b1b;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.notice {
+  background: #fffbeb;
+  border: 1px solid #f2dda4;
+  color: #92400e;
+  border-radius: 6px;
+  padding: 12px 14px;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
