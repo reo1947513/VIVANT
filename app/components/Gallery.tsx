@@ -1,19 +1,19 @@
 /* eslint-disable @next/next/no-img-element */
 import { shop } from "../data/siteData";
-import { publicFileExists } from "../lib/publicImage";
+import type { GalleryImage } from "../lib/types";
 
 /**
- * GALLERY：店内写真グリッド（4列）。/images/gallery/01.jpg〜08.jpg を置けば表示、
- * 無ければ「NO IMAGE」のプレースホルダを表示する。下に TikTok 誘導ボタン。
- * TikTok URL は app/data/siteData.ts 参照。
+ * GALLERY：店内写真のグリッドと、TikTok への誘導ボタン。
  *
- * 画像の有無はサーバー側（このコンポーネントの描画時）に public/ を見て判定する。
- * 以前はブラウザの読み込み失敗を待って隠す方式だったが、失敗の合図を取りこぼすと
- * 壊れた画像アイコンと代替テキストがそのまま残るため、出し分け自体をサーバー側へ移した。
+ * 写真は管理画面（/admin/gallery）から登録し、Supabase で管理している。
+ * 以前は 01.jpg〜08.jpg の8枠固定だったが、枚数を自由にできるようにした。
+ *
+ * 1枚も登録が無いときは、この区画そのものを出さない。
+ * 空の枠が8つ並ぶより、区画ごと無いほうが未完成な印象を与えないため。
  */
-const ITEMS = [1, 2, 3, 4, 5, 6, 7, 8];
+export default function Gallery({ images }: { images: GalleryImage[] }) {
+  if (images.length === 0) return null;
 
-export default function Gallery() {
   return (
     <section className="section" id="gallery">
       <div className="wrap">
@@ -23,25 +23,16 @@ export default function Gallery() {
           <span className="rule"></span>
         </div>
         <div className="gallery-grid">
-          {ITEMS.map((n) => {
-            const nn = String(n).padStart(2, "0");
-            const src = `/images/gallery/${nn}.jpg`;
-            const exists = publicFileExists(src);
-            return (
-              <div
-                className={exists ? "ph reveal" : "ph ph--empty reveal"}
-                key={nn}
-              >
-                {exists && (
-                  <img
-                    className="ph-img"
-                    src={src}
-                    alt={`${shop.nameEn} 店内 ${n}`}
-                  />
-                )}
-              </div>
-            );
-          })}
+          {images.map((image, index) => (
+            <div className="ph reveal" key={image.id}>
+              <img
+                className="ph-img"
+                src={image.imageUrl}
+                alt={image.alt || `${shop.nameEn} 店内 ${index + 1}`}
+                loading="lazy"
+              />
+            </div>
+          ))}
         </div>
 
         <div className="sns-cta reveal">
