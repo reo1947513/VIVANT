@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "../../admin.module.css";
@@ -9,6 +9,12 @@ import styles from "../../admin.module.css";
 /**
  * キャスト一覧の表。並び替え・公開の切替・削除をここで行う。
  * 一覧の取得はサーバー側で済ませ、ここは受け取った内容を表示して操作を送るだけ。
+ *
+ * 並び替えは、行をつかんで上下に動かす方式（ドラッグ&ドロップ）。
+ * 離した時点で、その週ならぬ「その一覧の並び順」を丸ごと送り直す。
+ *
+ * 補足：この仕組みはマウス操作向けのもので、スマートフォンの指の操作では動かない。
+ * そのため画面が狭いときだけ、上下ボタンも併せて表示している。
  */
 export type CastRow = {
   id: string;
@@ -24,14 +30,24 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
 
-  if (casts.length === 0) {
-    return (
-      <div className={styles.tableWrap}>
-        <p className={styles.empty}>
-          まだキャストが登録されていません。「新規追加」から登録してください。
-        </p>
-      </div>
-    );
+  // つかんでいる行の位置と、いま重なっている行の位置。
+  // 位置は「見た目の変化」と「離したときの計算」の両方で使う。
+  // 見た目には状態（useState）を使うが、計算には ref も併せて持つ。
+  // 状態の反映は次の描画まで待たされるため、掴んですぐ離したような場合に
+  // 計算側が古い値（null）を読んでしまい、並び替えが効かないことがあるため。
+  const dragIndexRef = useRef<number | null>(null);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
+
+  function beginDrag(index: number) {
+    dragIndexRef.current = index;
+    setDragIndex(index);
+  }
+
+  function endDrag() {
+    dragIndexRef.current = null;
+    setDragIndex(null);
+    setOverIndex(null);
   }
 
   async function send(
@@ -58,13 +74,8 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
     }
   }
 
-  /** 1つ上（-1）または下（+1）へ移動し、並び順を丸ごと送り直す */
-  async function move(index: number, direction: -1 | 1) {
-    const next = [...casts];
-    const target = index + direction;
-    if (target < 0 || target >= next.length) return;
-    [next[index], next[target]] = [next[target], next[index]];
-
+  /** 並び順を丸ごと送り直す（途中で番号が重複していても、この操作で整う） */
+  async function saveOrder(next: CastRow[]) {
     await send(
       "/api/admin/casts/reorder",
       {
@@ -72,8 +83,29 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids: next.map((c) => c.id) }),
       },
-      `move-${casts[index].id}`
+      "reorder"
     );
+  }
+
+  /** from の行を to の位置へ移した並びを返す */
+  function reordered(from: number, to: number): CastRow[] {
+    const next = [...casts];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+    return next;
+  }
+
+  async function move(index: number, direction: -1 | 1) {
+    const target = index + direction;
+    if (target < 0 || target >= casts.length) return;
+    await saveOrder(reordered(index, target));
+  }
+
+  async function onDrop(index: number) {
+    const from = dragIndexRef.current;
+    endDrag();
+    if (from === null || from === index) return;
+    await saveOrder(reordered(from, index));
   }
 
   async function togglePublished(cast: CastRow) {
@@ -103,9 +135,22 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
     await send(`/api/admin/casts/${cast.id}`, { method: "DELETE" }, `del-${cast.id}`);
   }
 
+  if (casts.length === 0) {
+    return (
+      <div className={styles.tableWrap}>
+        <p className={styles.empty}>
+          まだキャストが登録されていません。「新規追加」から登録してください。
+        </p>
+      </div>
+    );
+  }
+
   return (
     <>
       {error && <p className={styles.alertError}>{error}</p>}
+      <p className={styles.hint} style={{ marginBottom: 10 }}>
+        行の左端の印をつかんで上下に動かすと、並び順を変えられます。離した時点で保存されます。
+      </p>
 
       <div className={styles.tableWrap}>
         <table className={styles.table}>
@@ -121,27 +166,53 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
           </thead>
           <tbody>
             {casts.map((cast, index) => (
-              <tr key={cast.id}>
+              <tr
+                key={cast.id}
+                draggable={busy === null}
+                onDragStart={() => beginDrag(index)}
+                onDragEnter={() => setOverIndex(index)}
+                onDragOver={(e) => e.preventDefault()}
+                onDragEnd={endDrag}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  onDrop(index);
+                }}
+                className={[
+                  dragIndex === index ? styles.rowDragging : "",
+                  overIndex === index && dragIndex !== null && dragIndex !== index
+                    ? styles.rowDropTarget
+                    : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
                 <td>
-                  <div style={{ display: "flex", gap: 4 }}>
-                    <button
-                      className={styles.iconBtn}
-                      type="button"
-                      onClick={() => move(index, -1)}
-                      disabled={index === 0 || busy !== null}
-                      aria-label={`${cast.name}を上へ`}
-                    >
-                      ↑
-                    </button>
-                    <button
-                      className={styles.iconBtn}
-                      type="button"
-                      onClick={() => move(index, 1)}
-                      disabled={index === casts.length - 1 || busy !== null}
-                      aria-label={`${cast.name}を下へ`}
-                    >
-                      ↓
-                    </button>
+                  <div className={styles.orderCell}>
+                    <span className={styles.dragHandle} title="つかんで上下に動かす">
+                      ⠿
+                    </span>
+                    <span className={styles.orderNumber}>{index + 1}</span>
+                    {/* 指の操作ではつかんで動かせないため、画面が狭いときだけ出す */}
+                    <span className={styles.rowMoveButtons}>
+                      <button
+                        className={styles.iconBtn}
+                        type="button"
+                        onClick={() => move(index, -1)}
+                        disabled={index === 0 || busy !== null}
+                        aria-label={`${cast.name}を上へ`}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        className={styles.iconBtn}
+                        type="button"
+                        onClick={() => move(index, 1)}
+                        disabled={index === casts.length - 1 || busy !== null}
+                        aria-label={`${cast.name}を下へ`}
+                      >
+                        ↓
+                      </button>
+                    </span>
                   </div>
                 </td>
                 <td>

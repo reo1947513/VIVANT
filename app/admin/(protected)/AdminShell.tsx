@@ -10,11 +10,19 @@ import styles from "../admin.module.css";
  * 認証そのものは親のレイアウト（サーバー側）で済んでいる。
  */
 const NAV = [
-  { href: "/admin/casts", label: "キャスト" },
-  { href: "/admin/gallery", label: "ギャラリー" },
-  { href: "/admin/shifts", label: "出勤情報" },
-  { href: "/admin/posts", label: "ブログ" },
+  { href: "/admin/casts", label: "キャスト", preview: "/#cast" },
+  { href: "/admin/gallery", label: "ギャラリー", preview: "/#gallery" },
+  { href: "/admin/shifts", label: "出勤情報", preview: "/#schedule" },
+  { href: "/admin/posts", label: "ブログ", preview: "/blog" },
 ] as const;
+
+/**
+ * いま開いている管理画面に対応する、公開ページの場所を返す。
+ * どれにも当てはまらないときはトップページ。
+ */
+function previewHref(pathname: string): string {
+  return NAV.find((item) => pathname.startsWith(item.href))?.preview ?? "/";
+}
 
 export default function AdminShell({
   email,
@@ -40,7 +48,17 @@ export default function AdminShell({
           <span className={styles.brandSub}>管理画面</span>
         </div>
         <div className={styles.headerRight}>
-          <span>{email}</span>
+          <span className={styles.headerEmail}>{email}</span>
+          {/* いま編集している内容が実際にどう見えるかを、別タブで開いて確かめられるようにする。
+              rel="noopener" は、開いた先から元の画面を操作されないようにするための指定。 */}
+          <a
+            className={styles.btnSecondary}
+            href={previewHref(pathname)}
+            target="_blank"
+            rel="noopener"
+          >
+            サイトで確認
+          </a>
           <button className={styles.btnSecondary} type="button" onClick={onLogout}>
             ログアウト
           </button>
