@@ -3,19 +3,19 @@
 
 import { useEffect, useRef } from "react";
 import { shop } from "../data/siteData";
-import { castPhotoSrc, type CastWithPhoto } from "../data/cast";
+import type { Cast } from "../lib/types";
 
 /*
   キャスト：本人同意を得た実在キャストのみを掲載する方針です。
-  ・現在の写真は【開発確認用のデモ画像】です（AI生成・実在しません）。全6枠（Rin/Mai/Yua/Nao/Saki/Emi）に配置済み。
+  ・現在の写真は【開発確認用のデモ画像】です（AI生成・実在しません）。
   ・本番公開前に必ず実在・本人同意済みキャストの実写真へ差し替えること
     （景品表示法・風営法の観点から、実在しない人物を在籍キャストとして掲載しない）。
-    差し替え手順は public/images/cast/README.txt を参照。
-  ・キャストの一覧（名前・一言・ファイル名）は app/data/cast.ts に移動した。
-    写真ファイルが実在するかどうかはサーバー側（page.tsx）で判定し、hasPhoto として受け取る。
+    差し替えは管理画面（/admin/casts）から行う。
+  ・キャストの情報は Supabase で管理し、page.tsx がサーバー側で取得して渡す。
+    ここは受け取った内容を表示するだけで、件数も内容も固定していない。
+  ・写真が無い枠は画像要素そのものを出さず、「NO IMAGE」のプレースホルダを表示する。
     ブラウザの読み込み失敗を待って隠す方式は、失敗の合図を取りこぼすと壊れた画像アイコンと
     代替テキストが残るため採用しない（ギャラリーで実際に発生したため方式を統一した）。
-  ・写真が無い枠は画像要素そのものを出さず、「NO IMAGE」のプレースホルダを表示する。
 */
 
 // 【仮公開中の一時設定】デモ画像のため、各キャストの「一言」は表示オフにしています。
@@ -23,15 +23,15 @@ import { castPhotoSrc, type CastWithPhoto } from "../data/cast";
 // false に戻すだけで、実在キャストの一言を再表示できます。
 const TEMP_HIDE_CWORD: boolean = true; // ← 本公開時に false に戻す（実写真差し替えとセット）
 
-function CastCard({ c }: { c: CastWithPhoto }) {
+function CastCard({ c }: { c: Cast }) {
   return (
     <article className="cast-card">
       {/* 写真が無い枠は img を出さず、CSS 側で「NO IMAGE」を表示する（cast-photo--empty） */}
-      <div className={c.hasPhoto ? "cast-photo" : "cast-photo cast-photo--empty"}>
-        {c.hasPhoto && (
+      <div className={c.photoUrl ? "cast-photo" : "cast-photo cast-photo--empty"}>
+        {c.photoUrl && (
           <img
             className="ph-img"
-            src={castPhotoSrc(c.file)}
+            src={c.photoUrl}
             alt={`BAR VIVANT キャスト ${c.name}`}
           />
         )}
@@ -46,8 +46,8 @@ function CastCard({ c }: { c: CastWithPhoto }) {
   );
 }
 
-/** cast：キャスト一覧に「写真が実在するか（hasPhoto）」を添えたもの。page.tsx がサーバー側で判定して渡す。 */
-export default function CastCarousel({ cast }: { cast: CastWithPhoto[] }) {
+/** cast：公開中のキャスト一覧。page.tsx がサーバー側で取得して渡す */
+export default function CastCarousel({ cast }: { cast: Cast[] }) {
   const carouselRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -358,32 +358,39 @@ export default function CastCarousel({ cast }: { cast: CastWithPhoto[] }) {
           <span className="rule"></span>
         </div>
 
-        <div
-          className="cast-carousel"
-          ref={carouselRef}
-          aria-roledescription="carousel"
-          aria-label="在籍キャスト（自動でスライドするカルーセル）"
-        >
-          {/* 中央スポットライト（固定の装飾。トラックと一緒には動かず中央に留まる／操作を邪魔しない） */}
-          <div className="cast-spotlight" aria-hidden="true"></div>
-          <div className="cast-track" ref={trackRef}>
-            {prepend.map((m, i) => (
-              <div className="cast-slot" key={`pre-${i}`} aria-hidden="true">
-                <CastCard c={m} />
-              </div>
-            ))}
-            {cast.map((m, i) => (
-              <div className="cast-slot" key={`o-${i}`}>
-                <CastCard c={m} />
-              </div>
-            ))}
-            {append.map((m, i) => (
-              <div className="cast-slot" key={`app-${i}`} aria-hidden="true">
-                <CastCard c={m} />
-              </div>
-            ))}
+        {/* 1人も登録されていない場合はカルーセルを出さない。
+            カード幅が0になって位置計算が破綻するため、案内文だけを見せる。
+            以前は6人固定だったが、管理画面から人数が変わるようになったため必要になった。 */}
+        {n === 0 ? (
+          <p className="cast-empty">ただいま準備中です。</p>
+        ) : (
+          <div
+            className="cast-carousel"
+            ref={carouselRef}
+            aria-roledescription="carousel"
+            aria-label="在籍キャスト（自動でスライドするカルーセル）"
+          >
+            {/* 中央スポットライト（固定の装飾。トラックと一緒には動かず中央に留まる／操作を邪魔しない） */}
+            <div className="cast-spotlight" aria-hidden="true"></div>
+            <div className="cast-track" ref={trackRef}>
+              {prepend.map((m, i) => (
+                <div className="cast-slot" key={`pre-${i}`} aria-hidden="true">
+                  <CastCard c={m} />
+                </div>
+              ))}
+              {cast.map((m, i) => (
+                <div className="cast-slot" key={`o-${i}`}>
+                  <CastCard c={m} />
+                </div>
+              ))}
+              {append.map((m, i) => (
+                <div className="cast-slot" key={`app-${i}`} aria-hidden="true">
+                  <CastCard c={m} />
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="sns-cta reveal">
           <a

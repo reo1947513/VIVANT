@@ -874,3 +874,13 @@ ul{ list-style:none; }
 }
 .cast-photo .ph-img{ object-position:center top; }
 .gallery-grid .ph{ overflow:hidden; }
+
+/* キャストが1人も登録されていないときの案内（管理画面から人数が変わるようになったため追加） */
+.cast-empty{
+  text-align:center;
+  color:var(--ink-faint);
+  font-family:var(--font-serif);
+  font-size:.95rem;
+  letter-spacing:.1em;
+  padding:60px 0;
+}
