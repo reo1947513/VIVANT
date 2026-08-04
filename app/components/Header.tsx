@@ -19,6 +19,7 @@ export default function Header() {
             <a href="#concept">CONCEPT</a>
             <a href="#system">SYSTEM</a>
             <a href="#cast">CAST</a>
+            <a href="#schedule">SCHEDULE</a>
             <a href="#gallery">GALLERY</a>
             <a href="#access">ACCESS</a>
           </nav>
@@ -54,6 +55,9 @@ export default function Header() {
           </li>
           <li>
             <a href="#cast">CAST</a>
+          </li>
+          <li>
+            <a href="#schedule">SCHEDULE</a>
           </li>
           <li>
             <a href="#gallery">GALLERY</a>

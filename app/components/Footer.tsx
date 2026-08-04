@@ -11,6 +11,7 @@ export default function Footer() {
           <a href="#concept">CONCEPT</a>
           <a href="#system">SYSTEM</a>
           <a href="#cast">CAST</a>
+          <a href="#schedule">SCHEDULE</a>
           <a href="#gallery">GALLERY</a>
           <a href="#access">ACCESS</a>
         </nav>

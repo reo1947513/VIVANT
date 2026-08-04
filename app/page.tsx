@@ -3,6 +3,7 @@ import Hero from "./components/Hero";
 import Concept from "./components/Concept";
 import Features from "./components/Features";
 import CastCarousel from "./components/CastCarousel";
+import Schedule from "./components/Schedule";
 import System from "./components/System";
 import Gallery from "./components/Gallery";
 import Access from "./components/Access";
@@ -12,6 +13,7 @@ import ClientEffects from "./components/ClientEffects";
 import BackToTop from "./components/BackToTop";
 import { getPublishedCasts } from "./lib/queries/casts";
 import { getPublishedGalleryImages } from "./lib/queries/gallery";
+import { getWeeklyShifts } from "./lib/queries/shifts";
 
 /**
  * BAR VIVANT 集客LP。
@@ -28,10 +30,11 @@ import { getPublishedGalleryImages } from "./lib/queries/gallery";
 export const revalidate = 300;
 
 export default async function Home() {
-  // 2つの問い合わせは互いに関係がないので同時に投げる（順に待つと表示が遅くなる）
-  const [cast, galleryImages] = await Promise.all([
+  // 各問い合わせは互いに関係がないので同時に投げる（順に待つと表示が遅くなる）
+  const [cast, galleryImages, week] = await Promise.all([
     getPublishedCasts(),
     getPublishedGalleryImages(),
+    getWeeklyShifts(),
   ]);
 
   return (
@@ -41,6 +44,8 @@ export default async function Home() {
       <Concept />
       <Features />
       <CastCarousel cast={cast} />
+      {/* 在籍キャスト → その出勤予定、という流れになるようキャストの直後に置く */}
+      <Schedule week={week} />
       <System />
       <Gallery images={galleryImages} />
       <Access />

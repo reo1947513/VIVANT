@@ -142,7 +142,8 @@ ul{ list-style:none; }
   margin-top:1px;
 }
 
-.nav{ display:flex; align-items:center; gap:30px; }
+/* SCHEDULE を足して7項目になったため、間隔を 30px から 22px へ詰めて収める */
+.nav{ display:flex; align-items:center; gap:22px; }
 .nav a{
   font-family:var(--font-roman);
   font-size:.78rem;
@@ -883,4 +884,81 @@ ul{ list-style:none; }
   font-size:.95rem;
   letter-spacing:.1em;
   padding:60px 0;
+}
+
+/* ===================== SCHEDULE（出勤情報） =====================
+   日付ごとのカードを縦に積む。スマートフォンでの閲覧が中心のため、
+   横に7列並べる表ではなく縦積みにしている（横スクロールを避ける）。 */
+.schedule-list{
+  display:grid;
+  gap:14px;
+  max-width:760px;
+  margin:0 auto;
+}
+.schedule-day{
+  display:grid;
+  grid-template-columns:132px 1fr;
+  align-items:center;
+  gap:18px;
+  padding:16px 20px;
+  background:var(--card);
+  border:1px solid var(--hairline);
+  border-radius:3px;
+}
+.schedule-date{
+  font-family:var(--font-serif);
+  font-size:1rem;
+  letter-spacing:.08em;
+  color:var(--ink);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.schedule-today{
+  font-family:var(--font-sans);
+  font-size:.62rem;
+  letter-spacing:.14em;
+  color:var(--orange-bright);
+  border:1px solid var(--orange-line);
+  border-radius:999px;
+  padding:2px 8px;
+}
+.schedule-casts{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.schedule-cast{
+  display:flex;
+  align-items:baseline;
+  gap:7px;
+  padding:5px 12px;
+  border:1px solid var(--hairline);
+  border-radius:999px;
+  background:rgba(207,106,30,0.06);
+}
+.schedule-name{
+  font-family:var(--font-roman);
+  font-size:.9rem;
+  letter-spacing:.06em;
+  color:var(--ink);
+}
+.schedule-time{
+  font-family:var(--font-num);
+  font-size:.82rem;
+  letter-spacing:.04em;
+  color:var(--ink-dim);
+}
+.schedule-off{
+  font-size:.85rem;
+  letter-spacing:.08em;
+  color:var(--ink-faint);
+}
+
+@media (max-width:860px){
+  .schedule-day{
+    grid-template-columns:1fr;
+    gap:10px;
+    padding:14px 16px;
+  }
 }
