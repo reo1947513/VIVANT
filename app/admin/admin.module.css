@@ -373,3 +373,43 @@
   background: #eceff2;
   flex: none;
 }
+
+/* ------------------------------ ギャラリー ------------------------------ */
+.uploadBox {
+  background: #fff;
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+.galleryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+.galleryItem {
+  background: #fff;
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.galleryImg {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  background: #eceff2;
+}
+.galleryItemBody {
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.galleryItemHidden .galleryImg {
+  opacity: 0.35;
+}

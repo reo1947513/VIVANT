@@ -11,6 +11,7 @@ import Footer from "./components/Footer";
 import ClientEffects from "./components/ClientEffects";
 import BackToTop from "./components/BackToTop";
 import { getPublishedCasts } from "./lib/queries/casts";
+import { getPublishedGalleryImages } from "./lib/queries/gallery";
 
 /**
  * BAR VIVANT 集客LP。
@@ -27,7 +28,11 @@ import { getPublishedCasts } from "./lib/queries/casts";
 export const revalidate = 300;
 
 export default async function Home() {
-  const cast = await getPublishedCasts();
+  // 2つの問い合わせは互いに関係がないので同時に投げる（順に待つと表示が遅くなる）
+  const [cast, galleryImages] = await Promise.all([
+    getPublishedCasts(),
+    getPublishedGalleryImages(),
+  ]);
 
   return (
     <>
@@ -37,7 +42,7 @@ export default async function Home() {
       <Features />
       <CastCarousel cast={cast} />
       <System />
-      <Gallery />
+      <Gallery images={galleryImages} />
       <Access />
       <Reserve />
       <Footer />

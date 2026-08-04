@@ -49,7 +49,8 @@ export default function Hero() {
 
         <div className="hero-right hero-anim d5">
           {/* 店内メイン写真：/images/hero.jpg を置けば表示／無ければ「NO IMAGE」表示。
-              有無の判定はサーバー側（publicFileExists）で行い、ギャラリー・キャストと方式を揃えている。 */}
+              この写真は管理画面の対象外なので public/ に固定で置き、有無をサーバー側で判定する。
+              管理画面から差し替えるキャスト写真・ギャラリーは Supabase Storage 側にある。 */}
           <div className={heroPhotoExists ? "hero-photo" : "hero-photo hero-photo--empty"}>
             {heroPhotoExists && (
               <img className="ph-img" src={HERO_PHOTO} alt={`${shop.nameEn} 店内`} />
