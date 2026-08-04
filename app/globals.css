@@ -962,3 +962,108 @@ ul{ list-style:none; }
     padding:14px 16px;
   }
 }
+
+/* ===================== BLOG（お知らせ・記事） ===================== */
+.blog-grid{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:26px;
+}
+.blog-card{
+  display:block;
+  background:var(--card);
+  border:1px solid var(--hairline);
+  border-radius:3px;
+  overflow:hidden;
+  transition:border-color .3s ease, transform .3s ease;
+}
+.blog-card:hover{
+  border-color:var(--orange-line);
+  transform:translateY(-3px);
+}
+.blog-cover{
+  aspect-ratio:16/9;
+  background:linear-gradient(140deg, #24180f, #2e1d12);
+  overflow:hidden;
+}
+.blog-cover img{
+  width:100%; height:100%;
+  object-fit:cover;
+}
+.blog-cover--empty::after{
+  content:"NO IMAGE";
+  display:grid; place-items:center;
+  width:100%; height:100%;
+  color:var(--ink-faint);
+  font-family:var(--font-roman);
+  font-size:.7rem; letter-spacing:.25em;
+}
+.blog-body{ padding:18px 20px 22px; }
+.blog-date{
+  display:block;
+  font-family:var(--font-num);
+  font-size:.78rem;
+  letter-spacing:.08em;
+  color:var(--orange-bright);
+  margin-bottom:8px;
+}
+.blog-title{
+  font-family:var(--font-serif);
+  font-weight:500;
+  font-size:1.02rem;
+  line-height:1.6;
+  color:var(--ink);
+  margin-bottom:8px;
+}
+.blog-excerpt{
+  font-size:.84rem;
+  line-height:1.8;
+  color:var(--ink-dim);
+}
+
+/* 記事一覧ページ・記事ページ（トップの下層。ヘッダー分の余白を上に取る） */
+.page-main{ padding-top:var(--header-h); }
+.blog-list{
+  display:grid;
+  grid-template-columns:repeat(2, 1fr);
+  gap:26px;
+}
+.article{
+  max-width:760px;
+  margin:0 auto;
+}
+.article-head{ margin-bottom:28px; }
+.article-title{
+  font-family:var(--font-serif);
+  font-weight:500;
+  font-size:clamp(1.4rem, 4vw, 2rem);
+  line-height:1.5;
+  margin:10px 0 0;
+}
+.article-cover{
+  width:100%;
+  aspect-ratio:16/9;
+  object-fit:cover;
+  border-radius:3px;
+  margin-bottom:28px;
+}
+/* 本文はプレーンテキスト。改行だけを反映し、HTMLとしては解釈しない */
+.article-body{
+  white-space:pre-wrap;
+  font-size:.95rem;
+  line-height:2;
+  color:var(--ink-dim);
+}
+.article-back{
+  display:block;
+  margin-top:44px;
+  text-align:center;
+  font-family:var(--font-roman);
+  font-size:.8rem;
+  letter-spacing:.16em;
+  color:var(--orange-bright);
+}
+
+@media (max-width:860px){
+  .blog-grid, .blog-list{ grid-template-columns:1fr; gap:18px; }
+}
