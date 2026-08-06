@@ -1,6 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
 import { shop } from "../data/siteData";
 import type { GalleryImage } from "../lib/types";
+import GalleryGrid from "./GalleryGrid";
 
 /**
  * GALLERY：店内写真のグリッドと、TikTok への誘導ボタン。
@@ -10,6 +10,9 @@ import type { GalleryImage } from "../lib/types";
  *
  * 1枚も登録が無いときは、この区画そのものを出さない。
  * 空の枠が8つ並ぶより、区画ごと無いほうが未完成な印象を与えないため。
+ *
+ * グリッドと拡大表示は押したときの動きが要るため、GalleryGrid（client）に分けている。
+ * この区画自体はサーバー側で作るままにして、見出しや TikTok ボタンは静的に配る。
  */
 export default function Gallery({ images }: { images: GalleryImage[] }) {
   if (images.length === 0) return null;
@@ -22,18 +25,8 @@ export default function Gallery({ images }: { images: GalleryImage[] }) {
           <span className="sub">店内の様子</span>
           <span className="rule"></span>
         </div>
-        <div className="gallery-grid">
-          {images.map((image, index) => (
-            <div className="ph reveal" key={image.id}>
-              <img
-                className="ph-img"
-                src={image.imageUrl}
-                alt={image.alt || `${shop.nameEn} 店内 ${index + 1}`}
-                loading="lazy"
-              />
-            </div>
-          ))}
-        </div>
+
+        <GalleryGrid images={images} />
 
         <div className="sns-cta reveal">
           <a
