@@ -165,6 +165,44 @@
   border-color: #b45309;
 }
 
+/* パスワード欄（右端に表示切り替えの目ボタンを重ねる） */
+.passwordWrap {
+  position: relative;
+  display: block;
+}
+/* ボタンと文字が重ならないよう、右側の余白を広げた入力欄 */
+.inputPassword {
+  padding-right: 46px;
+}
+.passwordToggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #6b7280;
+  cursor: pointer;
+}
+.passwordToggle:hover {
+  background: #f3f4f6;
+  color: #1c2024;
+}
+.passwordToggle:focus-visible {
+  outline: 2px solid #b45309;
+  outline-offset: 1px;
+}
+.passwordToggle svg {
+  display: block;
+}
+
 /* ------------------------------ ボタン ------------------------------ */
 .btnPrimary,
 .btnSecondary,
