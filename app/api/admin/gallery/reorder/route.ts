@@ -33,16 +33,21 @@ export async function PATCH(request: Request) {
 
   const supabase = getAdminSupabase();
 
-  for (const [index, id] of parsed.data.ids.entries()) {
-    const { error } = await supabase
-      .from("gallery_images")
-      .update({ sort_order: index + 1 })
-      .eq("id", id);
+  // 全件をまとめて同時に更新する（1件ずつ待つと往復が枚数分だけ積み上がる）。
+  // 並び順は毎回全件を振り直す方式なので、一部が失敗しても再操作で必ず整う。
+  const results = await Promise.all(
+    parsed.data.ids.map((id, index) =>
+      supabase
+        .from("gallery_images")
+        .update({ sort_order: index + 1 })
+        .eq("id", id)
+    )
+  );
 
-    if (error) {
-      console.error("[vivant] ギャラリーの並び替えに失敗:", error.message);
-      return NextResponse.json({ error: "並び替えできませんでした。" }, { status: 500 });
-    }
+  const failed = results.find((result) => result.error);
+  if (failed?.error) {
+    console.error("[vivant] ギャラリーの並び替えに失敗:", failed.error.message);
+    return NextResponse.json({ error: "並び替えできませんでした。" }, { status: 500 });
   }
 
   revalidatePublic("gallery");

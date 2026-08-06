@@ -747,12 +747,15 @@ ul{ list-style:none; }
   padding-top:3px;
 }
 .access-info dd{ color:var(--ink-dim); font-size:.92rem; line-height:1.8; }
+/* 電話番号は Cormorant の旧式数字（6や9が下にはみ出す形）をやめ、
+   サンセリフを字間広めで置く。数字の幅を揃えて（tabular-nums）並びを整える。 */
 .access-info .tel{
-  font-family:var(--font-num);
-  font-weight:600;
+  font-family:var(--font-sans);
+  font-weight:400;
   font-size:1.6rem;
   color:var(--ink);
-  letter-spacing:.04em;
+  letter-spacing:.12em;
+  font-variant-numeric:lining-nums tabular-nums;
 }
 .access-sns{ display:flex; gap:14px; margin-top:6px; }
 .access-sns a{
@@ -799,13 +802,15 @@ ul{ list-style:none; }
   font-size:1rem; color:var(--ink-dim);
   margin-bottom:26px;
 }
+/* ご予約欄の大きな電話番号。上のアクセス欄と同じ考え方で揃える */
 .reserve-card .rtel{
   display:inline-block;
-  font-family:var(--font-num);
-  font-weight:600;
-  font-size:2.5rem;
+  font-family:var(--font-sans);
+  font-weight:300;
+  font-size:2.3rem;
   color:var(--ink);
-  letter-spacing:.04em;
+  letter-spacing:.1em;
+  font-variant-numeric:lining-nums tabular-nums;
 }
 .reserve-card .rhours{
   font-size:.78rem; color:var(--ink-faint);

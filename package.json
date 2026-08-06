@@ -8,7 +8,8 @@
     "start": "next start",
     "seed:casts": "node scripts/seed-casts.mjs",
     "add:cast": "node scripts/add-cast.mjs",
-    "add:gallery": "node scripts/add-gallery.mjs"
+    "add:gallery": "node scripts/add-gallery.mjs",
+    "seed:test": "node scripts/seed-test-content.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",

@@ -35,17 +35,23 @@ export async function PATCH(request: Request) {
 
   const supabase = getAdminSupabase();
 
-  // 件数は多くても数十件なので、1件ずつ順番に更新して問題ない
-  for (const [index, id] of parsed.data.ids.entries()) {
-    const { error } = await supabase
-      .from("casts")
-      .update({ sort_order: index + 1 })
-      .eq("id", id);
+  // 全件をまとめて同時に更新する。
+  // 1件ずつ順番に待つと、データベースまでの往復が件数分だけ積み上がる
+  // （8人なら8往復）。並び順は毎回全件を振り直す方式なので、
+  // 万一一部が失敗しても、もう一度並び替えれば必ず整った状態に直る。
+  const results = await Promise.all(
+    parsed.data.ids.map((id, index) =>
+      supabase
+        .from("casts")
+        .update({ sort_order: index + 1 })
+        .eq("id", id)
+    )
+  );
 
-    if (error) {
-      console.error("[vivant] 並び替えに失敗:", error.message);
-      return NextResponse.json({ error: "並び替えできませんでした。" }, { status: 500 });
-    }
+  const failed = results.find((result) => result.error);
+  if (failed?.error) {
+    console.error("[vivant] 並び替えに失敗:", failed.error.message);
+    return NextResponse.json({ error: "並び替えできませんでした。" }, { status: 500 });
   }
 
   revalidatePublic("casts");

@@ -28,6 +28,42 @@ export default function PostForm({ initial }: { initial: PostFormValues }) {
 
   const [slug, setSlug] = useState(initial.slug);
   const [title, setTitle] = useState(initial.title);
+  // URL名を自分で書き換えたかどうか。書き換えた後は題名に追従させない
+  const [slugTouched, setSlugTouched] = useState(Boolean(initial.slug));
+
+  /**
+   * 題名からURL名を作る。
+   * 英数字が含まれていればそれを使い（例：Summer Campaign → summer-campaign）、
+   * 日本語だけの題名では作れないため、日付と時刻から作る（例：20260806-1932）。
+   * 住所は後から変えると以前の住所で開けなくなるため、記事を新しく作るときだけ働く。
+   */
+  function makeSlug(source: string): string {
+    const fromTitle = source
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 60)
+      .replace(/-+$/g, "");
+
+    if (fromTitle.length >= 3) return fromTitle;
+
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return [
+      now.getFullYear(),
+      pad(now.getMonth() + 1),
+      pad(now.getDate()),
+      "-",
+      pad(now.getHours()),
+      pad(now.getMinutes()),
+    ].join("");
+  }
+
+  /** 題名の入力。新規作成でURL名に手を入れていない間は、URL名も一緒に決める */
+  function changeTitle(value: string) {
+    setTitle(value);
+    if (!isEdit && !slugTouched) setSlug(makeSlug(value));
+  }
   const [excerpt, setExcerpt] = useState(initial.excerpt);
   const [body, setBody] = useState(initial.body);
   const [isPublished, setIsPublished] = useState(initial.isPublished);
@@ -126,7 +162,7 @@ export default function PostForm({ initial }: { initial: PostFormValues }) {
         <input
           className={styles.input}
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => changeTitle(e.target.value)}
           maxLength={120}
           required
         />
@@ -139,14 +175,19 @@ export default function PostForm({ initial }: { initial: PostFormValues }) {
           <input
             className={styles.input}
             value={slug}
-            onChange={(e) => setSlug(e.target.value)}
+            onChange={(e) => {
+              // 一度でも自分で書き換えたら、以後は題名から作り直さない
+              setSlugTouched(true);
+              setSlug(e.target.value);
+            }}
             maxLength={80}
             required
           />
         </span>
         <span className={styles.hint}>
-          小文字の英数字とハイフンだけで入力してください（例：summer-campaign）。
-          公開後に変更すると、以前の住所では開けなくなります。
+          {isEdit
+            ? "公開後に変更すると、以前の住所では開けなくなります。小文字の英数字とハイフンだけで入力してください。"
+            : "題名から自動で決まります。変えたいときだけ書き換えてください（小文字の英数字とハイフンのみ）。日本語の題名のときは日付と時刻から作ります。"}
         </span>
       </label>
 

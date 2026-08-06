@@ -97,14 +97,15 @@ export default function PostTable({ posts }: { posts: PostRow[] }) {
                     <Link className={styles.iconBtn} href={`/admin/posts/${post.id}/edit`}>
                       編集
                     </Link>
+                    {/* 押せなくするのはその行だけ。表全体を止めると重く感じるため */}
                     <button
                       className={styles.btnDanger}
                       type="button"
                       onClick={() => remove(post)}
-                      disabled={busy !== null}
+                      disabled={busy === post.id}
                       style={{ padding: "4px 10px", fontSize: 13 }}
                     >
-                      削除
+                      {busy === post.id ? "削除中…" : "削除"}
                     </button>
                   </div>
                 </td>

@@ -56,37 +56,58 @@ export async function POST(request: Request) {
     .limit(1)
     .maybeSingle();
 
-  let order = (last?.sort_order ?? 0) + 1;
+  const startOrder = (last?.sort_order ?? 0) + 1;
   let uploaded = 0;
   const failures: string[] = [];
 
-  for (const file of files) {
-    let saved;
-    try {
-      saved = await uploadImage("gallery", file);
-    } catch (e) {
-      failures.push(e instanceof UploadError ? e.message : "保存に失敗しました。");
-      continue;
+  // 表示順は選んだ順のまま保ちたいので、処理を始める前に番号を割り当てておく。
+  // 途中で失敗した番号は空き番になるが、並びの前後関係は変わらない。
+  const targets = files.map((file, index) => ({ file, sortOrder: startOrder + index }));
+
+  // 3枚ずつの束にして同時に処理する。1枚ずつ順番に待つと、
+  // 「画像の保存」と「行の登録」で1枚あたり2往復ぶんの待ち時間が積み上がる
+  // （10枚なら20往復）。すべてを一度に流すと通信と記憶域を圧迫するため、
+  // 束の大きさは3に抑えている。
+  const CHUNK_SIZE = 3;
+
+  for (let i = 0; i < targets.length; i += CHUNK_SIZE) {
+    const chunk = targets.slice(i, i + CHUNK_SIZE);
+
+    const results = await Promise.all(
+      chunk.map(async ({ file, sortOrder }): Promise<{ ok: boolean; message?: string }> => {
+        let saved;
+        try {
+          saved = await uploadImage("gallery", file);
+        } catch (e) {
+          return {
+            ok: false,
+            message: e instanceof UploadError ? e.message : "保存に失敗しました。",
+          };
+        }
+
+        const { error } = await supabase.from("gallery_images").insert({
+          image_url: saved.url,
+          image_path: saved.path,
+          alt: "",
+          sort_order: sortOrder,
+          is_published: true,
+        });
+
+        if (error) {
+          // 記録できなかった画像は使い道がないので消す
+          await deleteImage("gallery", saved.path);
+          console.error("[vivant] ギャラリー画像の記録に失敗:", error.message);
+          return { ok: false, message: "登録に失敗しました。" };
+        }
+
+        return { ok: true };
+      })
+    );
+
+    for (const result of results) {
+      if (result.ok) uploaded += 1;
+      else failures.push(result.message ?? "失敗しました。");
     }
-
-    const { error } = await supabase.from("gallery_images").insert({
-      image_url: saved.url,
-      image_path: saved.path,
-      alt: "",
-      sort_order: order,
-      is_published: true,
-    });
-
-    if (error) {
-      // 記録できなかった画像は使い道がないので消す
-      await deleteImage("gallery", saved.path);
-      console.error("[vivant] ギャラリー画像の記録に失敗:", error.message);
-      failures.push("登録に失敗しました。");
-      continue;
-    }
-
-    order += 1;
-    uploaded += 1;
   }
 
   if (uploaded > 0) revalidatePublic("gallery");
