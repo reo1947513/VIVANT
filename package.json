@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "seed:casts": "node scripts/seed-casts.mjs"
+    "seed:casts": "node scripts/seed-casts.mjs",
+    "add:cast": "node scripts/add-cast.mjs",
+    "add:gallery": "node scripts/add-gallery.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
