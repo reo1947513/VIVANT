@@ -1,4 +1,4 @@
-import { formatDateLabel } from "../lib/date";
+import { formatDateParts } from "../lib/date";
 import type { ShiftWeek } from "../lib/queries/shifts";
 import type { ShiftStatus } from "../lib/types";
 
@@ -56,12 +56,18 @@ export default function Schedule({ week }: { week: ShiftWeek }) {
                 <th className="schedule-castcol" scope="col">
                   キャスト
                 </th>
-                {week.dates.map((date, index) => (
-                  <th key={date} scope="col">
-                    {formatDateLabel(date)}
-                    {index === 0 && <span className="schedule-today">本日</span>}
-                  </th>
-                ))}
+                {week.dates.map((date, index) => {
+                  // 日付と曜日を上下2段に分ける。1行に置くと1列が広くなり、
+                  // 7日ぶんが画面に収まらず右端が見切れるため
+                  const { date: md, weekday } = formatDateParts(date);
+                  return (
+                    <th key={date} scope="col">
+                      <span className="schedule-md">{md}</span>
+                      <span className="schedule-dow">{weekday}</span>
+                      {index === 0 && <span className="schedule-today">本日</span>}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody>

@@ -78,6 +78,17 @@ export function formatDateLabel(isoDate: string): string {
   return `${m}/${d}(${WEEKDAY_JA[dow]})`;
 }
 
+/**
+ * 日付と曜日を分けて返す。
+ * 出勤表のように7日ぶんを横に並べる場所では、「8/7」と「金」を上下2段に置くと
+ * 1列あたりの幅が半分近くまで縮み、画面に収まりやすくなる。
+ */
+export function formatDateParts(isoDate: string): { date: string; weekday: string } {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  const dow = new Date(Date.UTC(y, m - 1, d, 12)).getUTCDay();
+  return { date: `${m}/${d}`, weekday: WEEKDAY_JA[dow] };
+}
+
 /** 日時を日本時間で「2026年8月3日」の形にする（ブログの公開日などの表示用） */
 export function formatJstDate(value: string | Date): string {
   const date = typeof value === "string" ? new Date(value) : value;
