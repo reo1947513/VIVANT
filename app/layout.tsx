@@ -22,9 +22,10 @@ const cinzel = Cinzel({
   variable: "--font-cinzel",
 });
 
+// 500は使用箇所が無いため読み込まない（料金の数字が600、ブログの日付が400）
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
-  weight: ["400", "500", "600"],
+  weight: ["400", "600"],
   display: "swap",
   variable: "--font-cormorant",
 });

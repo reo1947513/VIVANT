@@ -163,13 +163,18 @@ ul{ list-style:none; }
   transition:color .3s;
   position:relative;
 }
+/* 下線は幅ではなく横方向の伸縮で見せ消しする。
+   幅そのものを変えると毎コマ画面の再計算（レイアウト）が起きるが、
+   伸縮なら描画済みのものを引き伸ばすだけで済む。見た目は同じ。 */
 .nav a::after{
   content:""; position:absolute; left:0; bottom:-6px;
-  width:0; height:1px; background:var(--orange-bright);
-  transition:width .3s;
+  width:100%; height:1px; background:var(--orange-bright);
+  transform:scaleX(0);
+  transform-origin:left center;
+  transition:transform .3s;
 }
 .nav a:hover{ color:var(--ink); }
-.nav a:hover::after{ width:100%; }
+.nav a:hover::after{ transform:scaleX(1); }
 
 .btn-reserve{
   font-family:var(--font-roman);
@@ -194,17 +199,21 @@ ul{ list-style:none; }
   position:relative;
   background:none; border:none; cursor:pointer;
 }
+/* 3本とも中央（top:19px）に置き、上下の位置は移動で表す。
+   top を動かすと毎コマ再計算が入るが、移動なら入らない。
+   開いたときは移動を外して中央で交差させ、×印にする（見た目は従来と同じ）。 */
 .hamb span{
   position:absolute; left:7px; right:7px; height:1.5px;
+  top:19px;
   background:var(--ink);
-  transition:transform .35s ease, opacity .25s ease, top .35s ease;
+  transition:transform .35s ease, opacity .25s ease;
 }
-.hamb span:nth-child(1){ top:13px; }
-.hamb span:nth-child(2){ top:19px; }
-.hamb span:nth-child(3){ top:25px; }
-.hamb.open span:nth-child(1){ top:19px; transform:rotate(45deg); }
+.hamb span:nth-child(1){ transform:translateY(-6px); }
+.hamb span:nth-child(2){ transform:none; }
+.hamb span:nth-child(3){ transform:translateY(6px); }
+.hamb.open span:nth-child(1){ transform:rotate(45deg); }
 .hamb.open span:nth-child(2){ opacity:0; }
-.hamb.open span:nth-child(3){ top:19px; transform:rotate(-45deg); }
+.hamb.open span:nth-child(3){ transform:rotate(-45deg); }
 
 /* モバイルメニュー */
 .mobile-nav{
