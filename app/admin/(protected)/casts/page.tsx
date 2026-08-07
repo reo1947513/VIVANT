@@ -37,11 +37,6 @@ export default async function CastsPage() {
         </Link>
       </div>
 
-      <p className={styles.notice}>
-        現在の写真は開発確認用のデモ画像です。本公開の前に、実在し掲載の同意を得た方の
-        写真へ差し替えてください。
-      </p>
-
       <CastTable casts={casts} />
     </>
   );
