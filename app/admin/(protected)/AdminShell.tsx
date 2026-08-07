@@ -14,6 +14,7 @@ const NAV = [
   { href: "/admin/gallery", label: "ギャラリー", preview: "/#gallery" },
   { href: "/admin/shifts", label: "出勤情報", preview: "/#schedule" },
   { href: "/admin/posts", label: "ブログ", preview: "/blog" },
+  { href: "/admin/links", label: "SNSリンク", preview: "/#reserve" },
 ] as const;
 
 /**

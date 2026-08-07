@@ -823,6 +823,14 @@ ul{ list-style:none; }
   margin-top:12px;
 }
 .reserve-card .btn{ margin-top:8px; }
+/* SNSボタンは登録した数だけ並ぶ。狭い画面では折り返して縦に積む */
+.reserve-links{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:10px;
+  margin-top:6px;
+}
 
 /* ===================== フッター ===================== */
 .footer{

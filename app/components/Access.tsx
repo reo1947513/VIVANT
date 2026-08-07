@@ -1,11 +1,16 @@
 import { shop, mapEmbedSrc } from "../data/siteData";
+import { getSiteLinks } from "../lib/queries/links";
+import SnsIcon from "./SnsIcon";
 
 /**
  * ACCESS：左に店舗情報、右に Google マップ埋め込み（APIキー不要・output=embed）。
- * 住所・電話・営業・定休は確定実データ。SNS は TikTok のみ（Instagram/X は未提供）。
+ * 住所・電話・営業・定休は確定実データ。
+ * SNSは管理画面（/admin/links）で入れたURLの分だけ並ぶ。
  * 店舗情報・地図クエリは app/data/siteData.ts に一元管理。
  */
-export default function Access() {
+export default async function Access() {
+  const links = (await getSiteLinks()).filter((l) => l.url !== "");
+
   return (
     <section className="section section--alt" id="access">
       <div className="wrap">
@@ -45,22 +50,26 @@ export default function Access() {
               <dt>定休</dt>
               <dd>{shop.closed}</dd>
 
-              <dt>SNS</dt>
-              <dd>
-                <div className="access-sns">
-                  {/* TikTok（実URL反映済み）。Instagram／X は未提供のため掲載なし */}
-                  <a
-                    href={shop.tiktokUrl}
-                    target="_blank"
-                    rel="noopener"
-                    aria-label="TikTok"
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M16 8.2a6.3 6.3 0 0 0 3.7 1.2V6.7a3.6 3.6 0 0 1-2.5-1A3.7 3.7 0 0 1 16 3h-2.7v11.6a2.3 2.3 0 1 1-2.3-2.3c.2 0 .4 0 .6.1V9.6a5 5 0 1 0 4.4 5V8.2Z" />
-                    </svg>
-                  </a>
-                </div>
-              </dd>
+              {links.length > 0 && (
+                <>
+                  <dt>SNS</dt>
+                  <dd>
+                    <div className="access-sns">
+                      {links.map((link) => (
+                        <a
+                          key={link.platform}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener"
+                          aria-label={link.label || link.platform}
+                        >
+                          <SnsIcon platform={link.platform} />
+                        </a>
+                      ))}
+                    </div>
+                  </dd>
+                </>
+              )}
             </dl>
           </div>
 

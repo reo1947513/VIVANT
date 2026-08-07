@@ -13,7 +13,7 @@ import { revalidatePath, revalidateTag } from "next/cache";
  *   **書き込みを行う処理には必ずこれを入れること。** 入れ忘れると
  *   「保存したのにサイトに出ない」という分かりにくい不具合になる。
  */
-export type ContentKind = "casts" | "gallery" | "shifts" | "posts";
+export type ContentKind = "casts" | "gallery" | "shifts" | "posts" | "links";
 
 /** 内容の種類ごとのキャッシュ札。問い合わせ側（queries/*）と同じ文字列を使う */
 export const CACHE_TAGS: Record<ContentKind, string> = {
@@ -21,6 +21,7 @@ export const CACHE_TAGS: Record<ContentKind, string> = {
   gallery: "gallery",
   shifts: "shifts",
   posts: "posts",
+  links: "links",
 };
 
 /**

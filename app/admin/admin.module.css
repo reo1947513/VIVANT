@@ -248,6 +248,33 @@
   background: #fef2f2;
 }
 
+/* ------------------------------ SNSリンク ------------------------------ */
+.linkRow {
+  padding: 18px 0;
+  border-bottom: 1px solid #eef1f4;
+}
+.linkRow:first-child {
+  padding-top: 0;
+}
+.linkRow:last-child {
+  border-bottom: none;
+}
+.linkHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+/* tiktok / line などの識別子。表示名とは別に、どの枠かが分かるように出す */
+.linkPlatform {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
 /* ------------------------------ 通知 ------------------------------ */
 .alertError {
   background: #fef2f2;
