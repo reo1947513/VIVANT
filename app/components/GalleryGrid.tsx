@@ -1,7 +1,7 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { shop } from "../data/siteData";
 import type { GalleryImage } from "../lib/types";
 
@@ -91,10 +91,15 @@ export default function GalleryGrid({ images }: { images: GalleryImage[] }) {
             onClick={(e) => open(index, e)}
             aria-label={`${labelOf(image, index)}を拡大表示する`}
           >
-            <img
+            {/* 枠は1辺240px。倍の解像度の画面でも粗くならないよう480pxで用意し、
+                それ以上の原寸は配らない（受信量が10分の1以下になる） */}
+            <Image
               className="ph-img"
               src={image.imageUrl}
               alt={labelOf(image, index)}
+              width={480}
+              height={480}
+              sizes="240px"
               loading="lazy"
             />
           </button>
@@ -133,11 +138,15 @@ export default function GalleryGrid({ images }: { images: GalleryImage[] }) {
             </button>
           )}
 
-          {/* 写真そのものを押したときは閉じない（誤操作で閉じるのを防ぐ） */}
-          <img
+          {/* 写真そのものを押したときは閉じない（誤操作で閉じるのを防ぐ）。
+              拡大時の最大幅は900pxなので、それに合わせた大きさで配る */}
+          <Image
             className="lightbox-img"
             src={current.imageUrl}
             alt={labelOf(current, currentIndex)}
+            width={900}
+            height={1350}
+            sizes="(max-width: 960px) 92vw, 900px"
             onClick={(e) => e.stopPropagation()}
           />
 

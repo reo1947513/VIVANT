@@ -15,8 +15,10 @@
   --ink-faint: #7d7163;
   --hairline:  rgba(207,106,30,0.16);
 
-  --font-roman: 'Cinzel', serif;
-  --font-num:   'Cormorant Garamond', serif;
+  /* 見出しと数字の2書体は自前配信（app/layout.tsx で読み込み、変数で受け取る）。
+     読み込みに失敗した場合に備え、従来の書体名も後ろに残している。 */
+  --font-roman: var(--font-cinzel), 'Cinzel', serif;
+  --font-num:   var(--font-cormorant), 'Cormorant Garamond', serif;
   --font-serif: 'Noto Serif JP', serif;
   --font-sans:  'Noto Sans JP', sans-serif;
 
@@ -243,7 +245,7 @@ ul{ list-style:none; }
       rgba(16,11,7,0.03) 74%,
       rgba(16,11,7,0.18) 100%),
     linear-gradient(rgba(16,11,7,0.52), rgba(16,11,7,0.52)),
-    url('/images/hero-bg.jpg');
+    url('/images/hero-bg.webp');
   background-size:cover;
   background-position:center;
   background-repeat:no-repeat;
@@ -303,7 +305,11 @@ ul{ list-style:none; }
   margin-bottom:38px;
 }
 .hero-cta{ display:flex; gap:16px; flex-wrap:wrap; }
+/* display の指定は必須。a は既定で行内要素のため、指定しないと上下の余白が
+   行の高さに反映されず、塗りが前後の行にはみ出して文字が重なって見える
+   （ヒーローは .hero-cta が flex なので目立たず、ご予約欄で表面化していた）。 */
 .btn{
+  display:inline-block;
   font-family:var(--font-roman);
   font-size:.82rem; letter-spacing:.14em;
   padding:15px 32px;
@@ -881,7 +887,7 @@ ul{ list-style:none; }
         rgba(16,11,7,0.20) 50%,
         rgba(16,11,7,0.02) 100%),
       linear-gradient(rgba(16,11,7,0.46), rgba(16,11,7,0.46)),
-      url('/images/hero-bg.jpg');
+      url('/images/hero-bg.webp');
     background-position:72% 78%;
   }
   .hero .wrap{ grid-template-columns:1fr; gap:40px; }

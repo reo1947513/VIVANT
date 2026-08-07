@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 import { shop } from "../data/siteData";
 import { publicFileExists } from "../lib/publicImage";
 
@@ -53,7 +53,17 @@ export default function Hero() {
               管理画面から差し替えるキャスト写真・ギャラリーは Supabase Storage 側にある。 */}
           <div className={heroPhotoExists ? "hero-photo" : "hero-photo hero-photo--empty"}>
             {heroPhotoExists && (
-              <img className="ph-img" src={HERO_PHOTO} alt={`${shop.nameEn} 店内`} />
+              /* 最初の画面に出る写真なので priority を付ける。
+                 既定では画面外の画像と同じ扱いで後回しにされ、主役が最後に届いていた */
+              <Image
+                className="ph-img"
+                src={HERO_PHOTO}
+                alt={`${shop.nameEn} 店内`}
+                width={750}
+                height={566}
+                sizes="(max-width: 860px) 92vw, 560px"
+                priority
+              />
             )}
           </div>
         </div>

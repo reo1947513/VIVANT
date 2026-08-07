@@ -1,7 +1,7 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import { shop } from "../data/siteData";
 import type { Cast } from "../lib/types";
 
@@ -29,10 +29,13 @@ function CastCard({ c }: { c: Cast }) {
       {/* 写真が無い枠は img を出さず、CSS 側で「NO IMAGE」を表示する（cast-photo--empty） */}
       <div className={c.photoUrl ? "cast-photo" : "cast-photo cast-photo--empty"}>
         {c.photoUrl && (
-          <img
+          <Image
             className="ph-img"
             src={c.photoUrl}
             alt={`BAR VIVANT キャスト ${c.name}`}
+            width={520}
+            height={720}
+            sizes="(max-width: 860px) 60vw, 280px"
           />
         )}
       </div>
