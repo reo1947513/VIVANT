@@ -23,6 +23,10 @@ const supabaseHost = (() => {
 
 const nextConfig: NextConfig = {
   images: {
+    /* 縮小した画像を配信側で保持する期間。既定は短く、期限が切れるたびに
+       作り直しが走って最初の1人が待たされる。写真を差し替えると保存先の名前
+       （URL）ごと変わる作りなので、長く持っても古い写真が残る心配はない。 */
+    minimumCacheTTL: 2592000,
     remotePatterns: [
       {
         protocol: "https",

@@ -652,6 +652,12 @@ ul{ list-style:none; }
   grid-column:span 2;
   grid-row:span 2;
 }
+/* 写真の枠は、現れる演出を短くする（共通は1秒）。
+   読み込みが終わっていても濃くなるまで1秒待たされ、遅く感じる原因になっていた。 */
+.gallery-grid .gallery-tile.reveal{
+  transition-duration:.45s;
+}
+
 /* 枠は押せるボタン。見た目はこれまでの枠のまま、ボタンの既定の装飾だけ打ち消す */
 .gallery-grid .gallery-tile{
   margin:0; padding:0;

@@ -148,7 +148,11 @@ export default function GalleryGrid({ images }: { images: GalleryImage[] }) {
                   ? "(max-width: 680px) 70vw, 420px"
                   : "(max-width: 680px) 70vw, 205px"
               }
-              loading="lazy"
+              /* 画面に近づいてから読み込む方式（既定）をやめ、最初から読み込む。
+                 縮小後は1枚5〜8KBしかなく、全部でも70KB程度。
+                 後から読むと、スクロールした瞬間や横に送った瞬間に
+                 暗い枠が見えてしまい、遅く感じる原因になっていた。 */
+              loading="eager"
             />
           </button>
         ))}

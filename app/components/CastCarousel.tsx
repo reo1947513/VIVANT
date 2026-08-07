@@ -36,6 +36,9 @@ function CastCard({ c }: { c: Cast }) {
             width={520}
             height={720}
             sizes="(max-width: 860px) 60vw, 280px"
+            /* 自動で流れる作りのため、後から読み込む方式だと
+               流れてきた写真がまだ無い状態が見える。最初から読み込む。 */
+            loading="eager"
           />
         )}
       </div>
