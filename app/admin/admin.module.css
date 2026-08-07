@@ -421,6 +421,64 @@
   flex: none;
 }
 
+/* ------------------------------ まとめて操作 ------------------------------ */
+/* 印を付けた分をまとめて操作する帯。選んだ数と操作ボタンを並べる */
+.bulkBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  background: #fff;
+  border: 1px solid #e3e6ea;
+  border-radius: 8px;
+}
+.bulkCount {
+  font-size: 13px;
+  font-weight: 600;
+  color: #b45309;
+}
+.bulkCheckLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #4b5563;
+  cursor: pointer;
+}
+.bulkBar .btnSecondary,
+.bulkBar .btnDanger {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+/* 見た目を持たない文字だけのボタン（選択の解除など） */
+.btnLinkPlain {
+  padding: 6px 4px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #6b7280;
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.btnLinkPlain:hover {
+  color: #1c2024;
+}
+.btnLinkPlain:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* 選択用の四角を置く列。幅を詰めて表を圧迫しないようにする */
+.checkCol {
+  width: 34px;
+  padding-right: 0 !important;
+}
+.rowSelected td {
+  background: #fffbeb;
+}
+
 /* ------------------------------ ギャラリー ------------------------------ */
 .uploadBox {
   background: #fff;
@@ -435,12 +493,36 @@
   gap: 16px;
 }
 .galleryItem {
+  position: relative;
   background: #fff;
   border: 1px solid #e3e6ea;
   border-radius: 8px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+/* 写真の左上に置く、選択の四角とつかむ印 */
+.galleryPick {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #e3e6ea;
+  border-radius: 999px;
+}
+/* 落とす先の写真。枠を強調して位置を示す */
+.itemDropTarget {
+  outline: 2px solid #b45309;
+  outline-offset: 1px;
+}
+.itemSelected {
+  border-color: #b45309;
+  box-shadow: 0 0 0 2px rgba(180, 83, 9, 0.16);
 }
 .galleryImg {
   width: 100%;

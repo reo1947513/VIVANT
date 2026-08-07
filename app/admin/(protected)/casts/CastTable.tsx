@@ -16,6 +16,11 @@ import styles from "../../admin.module.css";
  * 補足：この仕組みはマウス操作向けのもので、スマートフォンの指の操作では動かない。
  * そのため画面が狭いときだけ、上下ボタンも併せて表示している。
  *
+ * まとめての操作について：
+ *   左端の四角に印を付けると、選んだ分だけまとめて公開・非公開・削除ができる。
+ *   1人ずつ窓口を呼ぶと人数分の往復が生じるため、専用の窓口（/api/admin/casts/bulk）へ
+ *   一度に送り、本人確認1回・書き込み1回で済ませている。
+ *
  * 押した瞬間の見た目について：
  *   保存の返事を待ってから表示を変えると、通信のあいだ画面が固まったように見える。
  *   そこで「押した時点の見た目」を先に反映し、通信は裏で行う（先読み表示）。
@@ -36,6 +41,9 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
 
+  // 印を付けた行の id
+  const [selected, setSelected] = useState<string[]>([]);
+
   // 先読み表示のための控え。サーバーの内容が変わった時点で捨てる
   const [pendingOrder, setPendingOrder] = useState<CastRow[] | null>(null);
   const [pendingPublished, setPendingPublished] = useState<Record<string, boolean>>({});
@@ -50,6 +58,8 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
   if (lastOrderSignature.current !== orderSignature) {
     lastOrderSignature.current = orderSignature;
     setPendingOrder(null);
+    // 消えた行の印が残らないようにする
+    setSelected((prev) => prev.filter((id) => casts.some((c) => c.id === id)));
   }
   if (lastPublishedSignature.current !== publishedSignature) {
     lastPublishedSignature.current = publishedSignature;
@@ -58,10 +68,19 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
 
   // 画面に出す並び。先読み中はそちらを優先する
   const rows = pendingOrder ?? casts;
+  const allSelected = rows.length > 0 && selected.length === rows.length;
 
   /** その行の公開状態。先読み中はそちらを優先する */
   function publishedOf(cast: CastRow): boolean {
     return pendingPublished[cast.id] ?? cast.is_published;
+  }
+
+  function toggleSelect(id: string) {
+    setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  }
+
+  function toggleSelectAll() {
+    setSelected(allSelected ? [] : rows.map((c) => c.id));
   }
 
   // つかんでいる行の位置と、いま重なっている行の位置。
@@ -84,11 +103,7 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
     setOverIndex(null);
   }
 
-  async function send(
-    url: string,
-    options: RequestInit,
-    key: string
-  ): Promise<boolean> {
+  async function send(url: string, options: RequestInit, key: string): Promise<boolean> {
     setError("");
     setBusy(key);
     try {
@@ -183,6 +198,47 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
     await send(`/api/admin/casts/${cast.id}`, { method: "DELETE" }, `del-${cast.id}`);
   }
 
+  /** 印を付けた分をまとめて操作する */
+  async function bulk(action: "publish" | "unpublish" | "delete") {
+    if (selected.length === 0) return;
+
+    const names = rows
+      .filter((c) => selected.includes(c.id))
+      .map((c) => c.name)
+      .join("、");
+
+    if (action === "delete") {
+      if (
+        !confirm(
+          `${selected.length}名（${names}）を削除します。写真も一緒に削除され、元に戻せません。よろしいですか？`
+        )
+      ) {
+        return;
+      }
+    } else {
+      // 公開状態は押した瞬間に見た目へ反映する
+      const next = action === "publish";
+      setPendingPublished((prev) => {
+        const copy = { ...prev };
+        for (const id of selected) copy[id] = next;
+        return copy;
+      });
+    }
+
+    const ok = await send(
+      "/api/admin/casts/bulk",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: selected, action }),
+      },
+      "bulk"
+    );
+
+    if (ok) setSelected([]);
+    else if (action !== "delete") setPendingPublished({});
+  }
+
   if (casts.length === 0) {
     return (
       <div className={styles.tableWrap}>
@@ -198,12 +254,59 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
       {error && <p className={styles.alertError}>{error}</p>}
       <p className={styles.hint} style={{ marginBottom: 10 }}>
         行の左端の印をつかんで上下に動かすと、並び順を変えられます。離した時点で保存されます。
+        四角に印を付けると、まとめて公開・非公開・削除ができます。
       </p>
+
+      {selected.length > 0 && (
+        <div className={styles.bulkBar}>
+          <span className={styles.bulkCount}>{selected.length}名を選択中</span>
+          <button
+            className={styles.btnSecondary}
+            type="button"
+            onClick={() => bulk("publish")}
+            disabled={busy === "bulk"}
+          >
+            公開にする
+          </button>
+          <button
+            className={styles.btnSecondary}
+            type="button"
+            onClick={() => bulk("unpublish")}
+            disabled={busy === "bulk"}
+          >
+            非公開にする
+          </button>
+          <button
+            className={styles.btnDanger}
+            type="button"
+            onClick={() => bulk("delete")}
+            disabled={busy === "bulk"}
+          >
+            {busy === "bulk" ? "処理しています…" : "削除"}
+          </button>
+          <button
+            className={styles.btnLinkPlain}
+            type="button"
+            onClick={() => setSelected([])}
+            disabled={busy === "bulk"}
+          >
+            選択を解除
+          </button>
+        </div>
+      )}
 
       <div className={styles.tableWrap}>
         <table className={styles.table}>
           <thead>
             <tr>
+              <th className={styles.checkCol}>
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={toggleSelectAll}
+                  aria-label="すべて選択"
+                />
+              </th>
               <th>順番</th>
               <th>写真</th>
               <th>源氏名</th>
@@ -216,9 +319,9 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
             {rows.map((cast, index) => {
               // 押せなくするのは、その行で行っている操作の分だけにする。
               // 表全体を止めると、1件の保存のあいだ何も触れなくなり重く感じるため。
-              const rowBusy =
-                busy === `toggle-${cast.id}` || busy === `del-${cast.id}`;
+              const rowBusy = busy === `toggle-${cast.id}` || busy === `del-${cast.id}`;
               const orderBusy = busy === "reorder";
+              const checked = selected.includes(cast.id);
 
               return (
                 <tr
@@ -237,10 +340,19 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
                     overIndex === index && dragIndex !== null && dragIndex !== index
                       ? styles.rowDropTarget
                       : "",
+                    checked ? styles.rowSelected : "",
                   ]
                     .filter(Boolean)
                     .join(" ")}
                 >
+                  <td className={styles.checkCol}>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleSelect(cast.id)}
+                      aria-label={`${cast.name}を選択`}
+                    />
+                  </td>
                   <td>
                     <div className={styles.orderCell}>
                       <span className={styles.dragHandle} title="つかんで上下に動かす">
