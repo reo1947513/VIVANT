@@ -913,7 +913,27 @@ ul{ list-style:none; }
 }
 @media (max-width:680px){
   .features-grid{ grid-template-columns:repeat(2,1fr); }
-  .gallery-grid{ grid-template-columns:repeat(2,1fr); }
+
+  /* スマートフォンでは横に流れる見せ方にする。
+     枠を横一列に並べて横スクロールにし、指を離した位置で写真が中央に収まるよう
+     スナップさせる（scroll-snap）。自動送りは GalleryGrid 側から行う。
+     縦に積むと枚数ぶん画面が長くなるが、横に流せば高さは一定に保てる。 */
+  .gallery-grid{
+    display:flex;
+    grid-template-columns:none;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    /* 端の写真も中央に来られるよう、左右に余白を確保する */
+    padding:0 15vw;
+    margin:0 -28px;
+  }
+  .gallery-grid::-webkit-scrollbar{ display:none; }
+  .gallery-grid .gallery-tile{
+    flex:0 0 70vw;
+    scroll-snap-align:center;
+  }
 }
 @media (max-width:600px){
   .reserve-grid{ grid-template-columns:1fr; }

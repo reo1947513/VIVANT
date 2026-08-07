@@ -80,9 +80,52 @@ export default function GalleryGrid({ images }: { images: GalleryImage[] }) {
   const currentIndex = openIndex;
   const current = currentIndex === null ? null : images[currentIndex];
 
+  /*
+   * スマートフォンでは横に流れる見せ方にする。
+   *
+   * 仕組みは素直に「横スクロール＋一定間隔で1枚ぶん送る」。
+   * 指でのスワイプはブラウザ本来の動きをそのまま使うため、滑らかで取りこぼしがない。
+   * 触っている間と、触り終えてから5秒間は自動送りを止める（勝手に動いて読めなくなるのを防ぐ）。
+   * 末尾まで来たら先頭へ戻る。
+   *
+   * パソコンでは何もしない（枠が固定の並びで、流す必要がないため）。
+   * 動きを減らす設定の利用者にも自動送りはしない。
+   */
+  const stripRef = useRef<HTMLDivElement>(null);
+  const lastTouchRef = useRef(0);
+
+  function onTouchStart() {
+    lastTouchRef.current = Date.now();
+  }
+
+  useEffect(() => {
+    const strip = stripRef.current;
+    if (!strip) return;
+
+    const isNarrow = window.matchMedia("(max-width: 680px)").matches;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!isNarrow || reduced || images.length < 2) return;
+
+    const timer = window.setInterval(() => {
+      // 拡大表示を開いている間と、指で触った直後は動かさない
+      if (openIndex !== null) return;
+      if (Date.now() - lastTouchRef.current < 5000) return;
+
+      const tile = strip.firstElementChild as HTMLElement | null;
+      if (!tile) return;
+
+      const step = tile.getBoundingClientRect().width + 14; // 14px は写真どうしの間隔
+      const atEnd = strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 4;
+
+      strip.scrollTo({ left: atEnd ? 0 : strip.scrollLeft + step, behavior: "smooth" });
+    }, 4000);
+
+    return () => window.clearInterval(timer);
+  }, [images.length, openIndex]);
+
   return (
     <>
-      <div className="gallery-grid">
+      <div className="gallery-grid" ref={stripRef} onTouchStart={onTouchStart}>
         {images.map((image, index) => (
           <button
             type="button"
@@ -91,15 +134,16 @@ export default function GalleryGrid({ images }: { images: GalleryImage[] }) {
             onClick={(e) => open(index, e)}
             aria-label={`${labelOf(image, index)}を拡大表示する`}
           >
-            {/* 枠は1辺240px。倍の解像度の画面でも粗くならないよう480pxで用意し、
-                それ以上の原寸は配らない（受信量が10分の1以下になる） */}
+            {/* パソコンは1辺240pxの枠、スマートフォンは画面幅の7割ほど。
+                倍の解像度でも粗くならないよう480pxで用意し、原寸は配らない
+                （受信量が10分の1以下になる） */}
             <Image
               className="ph-img"
               src={image.imageUrl}
               alt={labelOf(image, index)}
               width={480}
               height={480}
-              sizes="240px"
+              sizes="(max-width: 680px) 70vw, 240px"
               loading="lazy"
             />
           </button>
