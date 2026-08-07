@@ -661,8 +661,9 @@ ul{ list-style:none; }
   pointer-events:none;
 }
 .slab{
+  --w:min(58vw, 300px);
   position:relative;
-  width:min(58vw, 300px);
+  width:var(--w);
   aspect-ratio:3/4;
   transform-style:preserve-3d;
   will-change:transform;
@@ -676,15 +677,20 @@ ul{ list-style:none; }
   outline:2px solid var(--orange-bright);
   outline-offset:14px;
 }
+/* 4枚を90度ずつ回して、板の幅の半分だけ外へ押し出す。
+   押し出す量を「幅の半分」にすると4枚の端がちょうど接し、
+   断面が正方形の柱（＝縦長の塊）になる。回ると面が入れ替わり、
+   斜めのときは2面と接合部の稜線が見えて厚みが出る。 */
 .slab-panel{
   position:absolute; inset:0;
   overflow:hidden;
   background:#0d0906;
   border:1px solid rgba(207,106,30,0.26);
-  box-shadow:0 30px 60px rgba(0,0,0,.55);
-  /* 奥の板ほど下がり、わずかに小さくする（重なりが自然に見える） */
-  transform:translateZ(calc(var(--i) * -10px)) scale(calc(1 - var(--i) * 0.012));
+  transform:rotateY(calc(var(--i) * 90deg)) translateZ(calc(var(--w) / 2));
 }
+/* 影は板に付けない。4枚が立体で交差するため、真横を向いた板の影が
+   正面の板の上に重なって写真を黒く潰してしまう（実機で確認）。
+   浮遊感は .slab-stage::after の床影で出す。 */
 .slab-panel img{
   width:100%; height:100%;
   object-fit:cover;
@@ -692,12 +698,10 @@ ul{ list-style:none; }
   -webkit-user-select:none; user-select:none;
   -webkit-touch-callout:none;
 }
-/* 奥の板ほど闇に沈める。塊の一体感と、側面の層らしさを出す */
-.slab-panel::after{
-  content:"";
-  position:absolute; inset:0;
-  background:rgba(10,6,4,calc(var(--i) * 0.26));
-}
+/* 面に重ねる陰影は置かない。
+   立体（preserve-3d）の中で疑似要素を重ねると、板の内側と外側の重なり順が
+   崩れて写真が真っ黒に潰れる現象を実機で確認したため（透明度に関係なく起きる）。
+   陰影が要るときは、板そのものへ filter を掛ける形にすること。 */
 
 /* ----- 写真の拡大表示（枠を押すと開く暗幕） -----
    ヘッダー(z-index:100)・モバイルナビ(99)・トップに戻る(90)より前に出す必要があるため 200。
@@ -950,8 +954,9 @@ ul{ list-style:none; }
 @media (max-width:680px){
   .features-grid{ grid-template-columns:repeat(2,1fr); }
 
-  /* 塊は狭い画面では少し大きく見せる（周囲に他の要素が無いため） */
-  .slab{ width:min(70vw, 300px); }
+  /* 塊は狭い画面では少し大きく見せる（周囲に他の要素が無いため）。
+     押し出す量は幅から計算するので、変数を書き換えれば箱の形は保たれる */
+  .slab{ --w:min(70vw, 300px); }
   .slab-stage{ min-height:min(70vh, 560px); }
 }
 @media (max-width:600px){
