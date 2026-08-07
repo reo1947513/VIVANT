@@ -6,26 +6,35 @@ import { shop } from "../data/siteData";
 import type { GalleryImage } from "../lib/types";
 
 /**
- * GALLERY の写真グリッドと、写真を押したときの拡大表示。
+ * GALLERY：暗闇に浮かぶ一枚岩（スラブ）と、押したときの拡大表示。
  *
- * 枠は正方形で大きさを固定し、入る枚数だけ折り返して中央に寄せる（CSS 側 .gallery-grid）。
- * 枠を押すと画面全体に暗幕を敷き、写真を切り抜かずに全体を表示する。
+ * 見せ方の考え方：
+ *   縦長の黒い塊が宙に浮いている。実体は写真を貼った板が4枚、
+ *   ほとんど隙間なく重なったもの。板は剥がれず、開かず、塊のまま動く。
+ *   塊は垂直の軸を中心にゆっくり自転し続ける。ページを開いた瞬間から止まらない。
+ *   画面を送ると自転が少し速くなり、わずかに傾いて側面の層（重なった4枚の厚み）が覗く。
+ *   送るのをやめても自転は続き、速さと傾きだけがゆっくり元へ戻る。
  *
- * 拡大表示の操作：
- *   閉じる     … ×ボタン / 暗幕を押す / Esc キー
- *   前後の写真 … ‹ › ボタン / ← → キー（写真が2枚以上のときだけ出す）
+ * 作り：
+ *   回転は毎フレーム自分で計算して当てる（CSSの繰り返し演出ではなく）。
+ *   速さと傾きをその場で変えたいのに、CSS側の演出だと途中から差し込めないため。
+ *   区画が画面から外れている間は計算を止める（見えないものを回し続けない）。
+ *   動きを減らす設定の利用者には、回さずに少しだけ傾けた姿で見せる。
  *
- * 開いている間は背景が動かないよう、body のスクロールを止める。
- * 閉じたときは、押した枠へキーボードの位置（フォーカス）を戻す。
+ * 押したときは拡大表示を開く。そこから左右の送りで全部の写真を見られるため、
+ * 塊に貼る4枚に入らなかった写真も辿れる。
  */
 export default function GalleryGrid({ images }: { images: GalleryImage[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
-  // 拡大表示を開く直前に触っていた枠。閉じたときにここへ戻す
+  // 拡大表示を開く直前に触っていた場所。閉じたときにここへ戻す
   const openerRef = useRef<HTMLElement | null>(null);
 
   const isOpen = openIndex !== null;
   const total = images.length;
+
+  // 塊を構成する板。仕様どおり4枚まで
+  const panels = images.slice(0, 4);
 
   const labelOf = (image: GalleryImage, index: number) =>
     image.alt || `${shop.nameEn} 店内 ${index + 1}`;
@@ -76,86 +85,104 @@ export default function GalleryGrid({ images }: { images: GalleryImage[] }) {
     };
   }, [isOpen, close, showPrev, showNext]);
 
+  // ---- 自転の制御 -------------------------------------------------------
+  const stageRef = useRef<HTMLDivElement>(null);
+  const slabRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const slab = slabRef.current;
+    const stage = stageRef.current;
+    if (!slab || !stage) return;
+
+    /* 動きを減らす設定のときは、止めるのではなく半分以下の速さで回し、
+       画面を送ったときの加速と傾きだけを無しにする。
+       完全に止めると「壊れている」と見えるため、カルーセルと同じ方針に揃えた。 */
+    const gentle = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let angle = 0; // 現在の向き（度）
+    let boost = 0; // 画面を送った勢いで上乗せする速さ（度/秒）
+    let tilt = 0; // 上下の傾き（度）
+    let visible = true;
+    let previous = 0;
+    let lastScrollY = window.scrollY;
+    let frameId = 0;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        visible = entry.isIntersecting;
+      },
+      { threshold: 0 }
+    );
+    observer.observe(stage);
+
+    function onScroll() {
+      if (gentle) return;
+      const delta = window.scrollY - lastScrollY;
+      lastScrollY = window.scrollY;
+      // 勢いは足し込むが上限を設ける（速く弾くと目で追えなくなるため）
+      boost = Math.min(boost + Math.abs(delta) * 0.5, 110);
+      // 傾きは送った向きに応じて上下へ。ここで側面の層が覗く
+      tilt = Math.max(Math.min(tilt + delta * 0.05, 11), -11);
+    }
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    function frame(now: number) {
+      frameId = window.requestAnimationFrame(frame);
+      if (!previous) previous = now;
+      const seconds = Math.min((now - previous) / 1000, 0.05);
+      previous = now;
+      if (!visible) return;
+
+      angle = (angle + ((gentle ? 3 : 7) + boost) * seconds) % 360;
+      // 上乗せぶんと傾きは、放っておくとゆっくり元へ戻る（1秒でおよそ8分の1）
+      boost *= Math.pow(0.12, seconds);
+      tilt *= Math.pow(0.25, seconds);
+
+      slab!.style.transform = `rotateX(${tilt.toFixed(2)}deg) rotateY(${angle.toFixed(2)}deg)`;
+    }
+
+    frameId = window.requestAnimationFrame(frame);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      window.removeEventListener("scroll", onScroll);
+      observer.disconnect();
+    };
+  }, []);
+
   // openIndex をそのまま使うと、下の JSX の中で「null ではない」と見なされないため控えを置く
   const currentIndex = openIndex;
   const current = currentIndex === null ? null : images[currentIndex];
 
-  /*
-   * スマートフォンでは横に流れる見せ方にする。
-   *
-   * 仕組みは素直に「横スクロール＋一定間隔で1枚ぶん送る」。
-   * 指でのスワイプはブラウザ本来の動きをそのまま使うため、滑らかで取りこぼしがない。
-   * 触っている間と、触り終えてから5秒間は自動送りを止める（勝手に動いて読めなくなるのを防ぐ）。
-   * 末尾まで来たら先頭へ戻る。
-   *
-   * パソコンでは何もしない（枠が固定の並びで、流す必要がないため）。
-   * 動きを減らす設定の利用者にも自動送りはしない。
-   */
-  const stripRef = useRef<HTMLDivElement>(null);
-  const lastTouchRef = useRef(0);
-
-  function onTouchStart() {
-    lastTouchRef.current = Date.now();
-  }
-
-  useEffect(() => {
-    const strip = stripRef.current;
-    if (!strip) return;
-
-    const isNarrow = window.matchMedia("(max-width: 680px)").matches;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!isNarrow || reduced || images.length < 2) return;
-
-    const timer = window.setInterval(() => {
-      // 拡大表示を開いている間と、指で触った直後は動かさない
-      if (openIndex !== null) return;
-      if (Date.now() - lastTouchRef.current < 5000) return;
-
-      const tile = strip.firstElementChild as HTMLElement | null;
-      if (!tile) return;
-
-      const step = tile.getBoundingClientRect().width + 14; // 14px は写真どうしの間隔
-      const atEnd = strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 4;
-
-      strip.scrollTo({ left: atEnd ? 0 : strip.scrollLeft + step, behavior: "smooth" });
-    }, 4000);
-
-    return () => window.clearInterval(timer);
-  }, [images.length, openIndex]);
-
   return (
     <>
-      <div className="gallery-grid" ref={stripRef} onTouchStart={onTouchStart}>
-        {images.map((image, index) => (
-          <button
-            type="button"
-            className="ph gallery-tile reveal"
-            key={image.id}
-            onClick={(e) => open(index, e)}
-            aria-label={`${labelOf(image, index)}を拡大表示する`}
-          >
-            {/* 配る大きさは置かれる枠に合わせる。パソコンでは先頭だけ2倍の枠、
-                スマートフォンでは画面幅の7割。倍の解像度でも粗くならない範囲で
-                用意し、原寸は配らない（受信量が10分の1以下になる） */}
-            <Image
-              className="ph-img"
-              src={image.imageUrl}
-              alt={labelOf(image, index)}
-              width={index === 0 ? 840 : 420}
-              height={index === 0 ? 840 : 420}
-              sizes={
-                index === 0
-                  ? "(max-width: 680px) 70vw, 420px"
-                  : "(max-width: 680px) 70vw, 205px"
-              }
-              /* 画面に近づいてから読み込む方式（既定）をやめ、最初から読み込む。
-                 縮小後は1枚5〜8KBしかなく、全部でも70KB程度。
-                 後から読むと、スクロールした瞬間や横に送った瞬間に
-                 暗い枠が見えてしまい、遅く感じる原因になっていた。 */
-              loading="eager"
-            />
-          </button>
-        ))}
+      <div className="slab-stage reveal" ref={stageRef}>
+        <button
+          type="button"
+          className="slab"
+          ref={slabRef}
+          onClick={(e) => open(0, e)}
+          aria-label="店内の写真を拡大表示する"
+        >
+          {panels.map((image, index) => (
+            <span
+              className="slab-panel"
+              key={image.id}
+              /* 手前から何枚目か。奥行きと暗さの計算に使う */
+              style={{ ["--i" as string]: index } as React.CSSProperties}
+            >
+              <Image
+                src={image.imageUrl}
+                alt={index === 0 ? labelOf(image, index) : ""}
+                width={620}
+                height={830}
+                sizes="(max-width: 680px) 70vw, 310px"
+                loading="eager"
+              />
+            </span>
+          ))}
+        </button>
       </div>
 
       {current !== null && currentIndex !== null && (
