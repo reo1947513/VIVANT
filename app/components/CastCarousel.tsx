@@ -171,14 +171,36 @@ export default function CastCarousel({ cast }: { cast: Cast[] }) {
 
     // 端のクローンに達したら、トランジションを切ってインデックスをリセット（シームレス）。
     // 自動再生・スワイプ共通。範囲内なら何もしないので、多重に呼ばれても安全（冪等）。
-    const normalizeLoop = () => {
-      if (index >= n + c) {
-        index -= n;
+    const normalizeLoop = (keepVisual = false) => {
+      const shift = index >= n + c ? -n : index < c ? n : 0;
+      if (shift === 0) return;
+
+      if (!keepVisual) {
+        index += shift;
         setPos(false);
-      } else if (index < c) {
-        index += n;
-        setPos(false);
+        return;
       }
+
+      /*
+       * 動いている途中で呼ばれたとき用。
+       *
+       * ふつうの補正は「今の番号にぴったり合う位置」へ即座に置き直す。
+       * ところが送っている最中（カードが2枚のあいだを移動中）に触ると、
+       * 残りの移動ぶんが切り捨てられて一瞬で飛ぶ＝「かくっ」となる。
+       * そこで、ぴったりの位置からどれだけずれていたかを測っておき、
+       * 番号を入れ替えたあとも同じだけずらして置く。
+       * 見た目の位置は1ピクセルも変わらないまま、番号だけが安全な範囲へ戻る。
+       */
+      const before = currentX();
+      const gap = before - xForIndex(); // ぴったりの位置からのずれ
+      index += shift;
+      const x = xForIndex() + gap;
+
+      track.style.setProperty("transition", "none", "important");
+      track.style.transform = "translateX(" + x + "px)";
+      void track.offsetWidth; // リフローを強制してから復帰（瞬間ジャンプを隠す）
+      track.style.setProperty("transition", "transform " + slideDur + "s " + EASE, "important");
+      highlight();
     };
     const onTransitionEnd = (e: TransitionEvent) => {
       if (e.propertyName !== "transform") return;
@@ -214,7 +236,20 @@ export default function CastCarousel({ cast }: { cast: Cast[] }) {
       else play();
     };
     let rt: number | undefined;
+    // 直前の横幅。縦の変化だけでは位置を計算し直さないための控え
+    let lastWidth = window.innerWidth;
     const onResize = () => {
+      /*
+       * 幅が変わっていないときは何もしない。
+       *
+       * スマートフォンでページを縦にスクロールすると、上下のアドレスバーが
+       * 伸び縮みして「高さだけ変わった」resize が飛ぶ。ここで位置を計算し直すと
+       * トランジションを切って一瞬で置き直すため、送っている最中の動きが
+       * 途切れて「かくっ」と見える。カードの並びは横幅でしか変わらないので、
+       * 高さだけの変化は無視してよい。
+       */
+      if (window.innerWidth === lastWidth) return;
+      lastWidth = window.innerWidth;
       if (rt !== undefined) clearTimeout(rt);
       rt = window.setTimeout(() => setPos(false), 120);
     };
@@ -244,7 +279,9 @@ export default function CastCarousel({ cast }: { cast: Cast[] }) {
       stop(); // 操作中は自動再生を止める
       clearResume(); // 直前の再開予約はいったん取り消し
       clearSnap();
-      normalizeLoop(); // 直前のスワイプでループ補正待ちなら、ここで先に確定させてから始める
+      // 直前の送りでループ補正待ちなら、ここで先に確定させてから始める。
+      // 送っている最中に触られた場合に飛んで見えないよう、見た目の位置は保ったまま補正する
+      normalizeLoop(true);
     };
     const onTouchMove = (e: TouchEvent) => {
       if (!dragging) return;
