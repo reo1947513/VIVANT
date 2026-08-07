@@ -3,7 +3,7 @@ import { getPublicSupabase } from "../supabase/public";
 import { hasSupabaseConfig } from "../supabase/env";
 import { CACHE_TAGS } from "../revalidate";
 import { businessTodayJst, addDays } from "../date";
-import type { Shift } from "../types";
+import type { ShiftStatus } from "../types";
 
 /**
  * 公開ページ用の出勤取得（今日から7日分）。
@@ -11,14 +11,20 @@ import type { Shift } from "../types";
  * 「今日」は営業日基準。営業が翌5時までなので、日本時間の朝5時より前は前日を今日とする
  * （app/lib/date.ts 参照）。素直に暦日で切ると、営業の真っ最中に本日の出勤が消える。
  *
- * 非公開のキャストの出勤は出さない。casts との結合を内部結合（!inner）にしているのは
- * そのためで、これを外部結合にすると、非公開キャストの行が「名前なし」で残ってしまう。
+ * 表示は「縦にキャスト・横に7日」の表なので、ここでもその形（升目）で返す。
+ * 記録が無い升目は「未定」とする。休みを毎日入力させずに済ませるための既定値。
+ *
+ * 非公開のキャストは行ごと出さない。出勤側の is_published は、
+ * 特定の日だけ伏せたいときのための仕組みで、伏せた日は「未定」として扱う。
  */
-export type ShiftsByDate = { date: string; shifts: Shift[] }[];
+export type ShiftWeek = {
+  dates: string[];
+  casts: { castId: string; castName: string; statuses: ShiftStatus[] }[];
+};
 
-async function fetchWeek(startDate: string): Promise<ShiftsByDate> {
+async function fetchWeek(startDate: string): Promise<ShiftWeek> {
   const dates = Array.from({ length: 7 }, (_, i) => addDays(startDate, i));
-  const empty: ShiftsByDate = dates.map((date) => ({ date, shifts: [] }));
+  const empty: ShiftWeek = { dates, casts: [] };
 
   if (!hasSupabaseConfig()) {
     console.error("[vivant] Supabase 未設定のため出勤情報を空で描画します");
@@ -26,48 +32,40 @@ async function fetchWeek(startDate: string): Promise<ShiftsByDate> {
   }
 
   try {
-    const { data, error } = await getPublicSupabase()
-      .from("shifts")
-      .select("id, cast_id, work_date, start_time, end_time, note, casts!inner(name, sort_order, is_published)")
-      .eq("is_published", true)
-      .eq("casts.is_published", true)
-      .gte("work_date", dates[0])
-      .lte("work_date", dates[dates.length - 1]);
+    // キャストと出勤は互いに依存しないため同時に取りに行く
+    const [castResult, shiftResult] = await Promise.all([
+      getPublicSupabase()
+        .from("casts")
+        .select("id, name")
+        .eq("is_published", true)
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: true }),
+      getPublicSupabase()
+        .from("shifts")
+        .select("cast_id, work_date, status")
+        .eq("is_published", true)
+        .gte("work_date", dates[0])
+        .lte("work_date", dates[dates.length - 1]),
+    ]);
 
-    if (error) throw new Error(error.message);
+    if (castResult.error) throw new Error(castResult.error.message);
+    if (shiftResult.error) throw new Error(shiftResult.error.message);
 
-    const byDate = new Map<string, Shift[]>(dates.map((d) => [d, []]));
-
-    for (const row of data ?? []) {
-      const cast = row.casts as unknown as { name: string; sort_order: number };
-      const list = byDate.get(row.work_date as string);
-      if (!list) continue;
-
-      list.push({
-        id: row.id as string,
-        castId: row.cast_id as string,
-        castName: cast?.name ?? "",
-        workDate: row.work_date as string,
-        // "20:00:00" の形で返るため、表示に使う "20:00" まで詰める
-        startTime: row.start_time ? String(row.start_time).slice(0, 5) : null,
-        endTime: row.end_time ? String(row.end_time).slice(0, 5) : null,
-        note: (row.note ?? "") as string,
-      });
+    // 「キャストID|日付」で引ける形に直しておく
+    const byKey = new Map<string, ShiftStatus>();
+    for (const row of shiftResult.data ?? []) {
+      const status = String(row.status ?? "undecided") as ShiftStatus;
+      byKey.set(`${row.cast_id}|${row.work_date}`, status);
     }
 
-    // 日ごとに、キャスト一覧と同じ並び順で見せる
-    const orderByCast = new Map<string, number>();
-    for (const row of data ?? []) {
-      const cast = row.casts as unknown as { sort_order: number };
-      orderByCast.set(row.cast_id as string, cast?.sort_order ?? 0);
-    }
-
-    return dates.map((date) => ({
-      date,
-      shifts: (byDate.get(date) ?? []).sort(
-        (a, b) => (orderByCast.get(a.castId) ?? 0) - (orderByCast.get(b.castId) ?? 0)
-      ),
-    }));
+    return {
+      dates,
+      casts: (castResult.data ?? []).map((cast) => ({
+        castId: cast.id as string,
+        castName: cast.name as string,
+        statuses: dates.map((date) => byKey.get(`${cast.id}|${date}`) ?? "undecided"),
+      })),
+    };
   } catch (e) {
     console.error("[vivant] 出勤情報の取得に失敗しました:", e);
     return empty;
@@ -79,9 +77,9 @@ async function fetchWeek(startDate: string): Promise<ShiftsByDate> {
  * 日付が変われば鍵も変わるため、前日の内容が翌日に残ることがない。
  */
 const cachedWeek = unstable_cache(fetchWeek, ["published-shifts"], {
-  tags: [CACHE_TAGS.shifts],
+  tags: [CACHE_TAGS.shifts, CACHE_TAGS.casts],
 });
 
-export async function getWeeklyShifts(): Promise<ShiftsByDate> {
+export async function getWeeklyShifts(): Promise<ShiftWeek> {
   return cachedWeek(businessTodayJst());
 }

@@ -506,30 +506,42 @@
 .shiftTable th.castCol {
   background: #fafbfc;
 }
-.timeInput {
-  width: 62px;
-  padding: 4px 6px;
-  font-size: 13px;
-  font-family: inherit;
-  color: #1c2024;
-  background: #fff;
-  border: 1px solid #cbd2d9;
-  border-radius: 4px;
-  text-align: center;
+/* ○ △ ✕ を選ぶ升目。3つを1組の切り替えボタンとして並べる */
+.markCell {
+  display: inline-flex;
+  gap: 2px;
 }
-.timeInput:focus {
+.markBtn {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1;
+  color: #9aa3ad;
+  background: #fff;
+  border: 1px solid #e3e6ea;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.markBtn:hover {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+.markBtn:focus-visible {
   outline: 2px solid #b45309;
   outline-offset: 1px;
 }
-.timeCell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
+/* いま選ばれているもの */
+.markBtnOn {
+  color: #fff;
+  background: #b45309;
+  border-color: #b45309;
+  font-weight: 600;
 }
-.timeSep {
-  color: #9aa3ad;
-  font-size: 12px;
+.markBtnOn:hover {
+  background: #92400e;
+  color: #fff;
 }
 .saveBar {
   display: flex;

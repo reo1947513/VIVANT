@@ -15,13 +15,10 @@ import { revalidatePublic } from "../../../lib/revalidate";
  * 日付は "YYYY-MM-DD"、時刻は "HH:MM" の文字列で受け取る。
  * 日付を日時（タイムゾーン付き）にしないのは、9時間ずれる事故を避けるため。
  */
-const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
-
 const entrySchema = z.object({
   castId: z.uuid(),
   workDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "日付の形式が不正です。"),
-  startTime: z.string().regex(timePattern, "時刻は 20:00 の形式で入力してください。").nullable(),
-  endTime: z.string().regex(timePattern, "時刻は 20:00 の形式で入力してください。").nullable(),
+  status: z.enum(["work", "undecided", "off"]),
 });
 
 const schema = z.object({
@@ -49,41 +46,27 @@ export async function PUT(request: Request) {
 
   const supabase = getAdminSupabase();
 
-  // 時間が1つでも入っていれば「出勤」とみなす。両方空なら「出勤なし」として消す
-  const toSave = parsed.data.entries.filter((e) => e.startTime || e.endTime);
-  const toDelete = parsed.data.entries.filter((e) => !e.startTime && !e.endTime);
+  // 未定も含めて、送られてきた升目をそのまま1回で書き込む。
+  // 以前は「時間が空の升目を1件ずつ消す」方式で、7日×人数ぶんの往復が生じていた。
+  // 状態そのものを持つようにしたため、削除は不要になり、往復も1回で済む。
+  const { error } = await supabase.from("shifts").upsert(
+    parsed.data.entries.map((e) => ({
+      cast_id: e.castId,
+      work_date: e.workDate,
+      status: e.status,
+      is_published: true,
+    })),
+    { onConflict: "cast_id,work_date" }
+  );
 
-  if (toSave.length > 0) {
-    const { error } = await supabase.from("shifts").upsert(
-      toSave.map((e) => ({
-        cast_id: e.castId,
-        work_date: e.workDate,
-        start_time: e.startTime,
-        end_time: e.endTime,
-        is_published: true,
-      })),
-      { onConflict: "cast_id,work_date" }
-    );
-
-    if (error) {
-      console.error("[vivant] 出勤の保存に失敗:", error.message);
-      return NextResponse.json({ error: "保存できませんでした。" }, { status: 500 });
-    }
+  if (error) {
+    console.error("[vivant] 出勤の保存に失敗:", error.message);
+    return NextResponse.json({ error: "保存できませんでした。" }, { status: 500 });
   }
 
-  for (const entry of toDelete) {
-    const { error } = await supabase
-      .from("shifts")
-      .delete()
-      .eq("cast_id", entry.castId)
-      .eq("work_date", entry.workDate);
-
-    if (error) {
-      console.error("[vivant] 出勤の削除に失敗:", error.message);
-      return NextResponse.json({ error: "保存できませんでした。" }, { status: 500 });
-    }
-  }
+  const work = parsed.data.entries.filter((e) => e.status === "work").length;
+  const off = parsed.data.entries.filter((e) => e.status === "off").length;
 
   revalidatePublic("shifts");
-  return NextResponse.json({ saved: toSave.length, cleared: toDelete.length });
+  return NextResponse.json({ saved: parsed.data.entries.length, work, off });
 }

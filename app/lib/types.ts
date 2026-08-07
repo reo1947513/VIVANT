@@ -29,15 +29,18 @@ export type GalleryImage = {
   isPublished: boolean;
 };
 
+/**
+ * 出勤の状態。画面では ○ 出勤 / △ 未定 / ✕ 休み として見せる。
+ * 記録が無い日は「未定」として扱う（入力の手間を減らすための既定値）。
+ */
+export type ShiftStatus = "work" | "undecided" | "off";
+
 /** 出勤1件（1キャストの1日分） */
 export type Shift = {
-  id: string;
   castId: string;
   castName: string;
   workDate: string; // "YYYY-MM-DD"（日本時間の暦日。時差の影響を受けない文字列で持つ）
-  startTime: string | null; // "HH:MM"
-  endTime: string | null; // "HH:MM"
-  note: string;
+  status: ShiftStatus;
 };
 
 /** ブログ記事 */

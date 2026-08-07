@@ -1,6 +1,7 @@
 import { getAdminSupabase } from "../../../lib/supabase/admin";
 import { businessTodayJst, addDays, formatDateLabel } from "../../../lib/date";
-import ShiftWeekGrid, { type ShiftCell, type CastRow } from "./ShiftWeekGrid";
+import ShiftWeekGrid, { type CastRow } from "./ShiftWeekGrid";
+import type { ShiftStatus } from "../../../lib/types";
 import styles from "../../admin.module.css";
 
 /**
@@ -35,20 +36,19 @@ export default async function ShiftsPage({
       .order("created_at", { ascending: true }),
     supabase
       .from("shifts")
-      .select("cast_id, work_date, start_time, end_time")
+      .select("cast_id, work_date, status")
       .gte("work_date", dates[0])
       .lte("work_date", dates[dates.length - 1]),
   ]);
 
   const casts = (castData ?? []) as CastRow[];
 
-  const initial: Record<string, ShiftCell> = {};
+  // 記録が無い升目は画面側で「未定」として扱うため、ここでは有る分だけ渡す
+  const initial: Record<string, ShiftStatus> = {};
   for (const row of shiftData ?? []) {
-    initial[`${row.cast_id}|${row.work_date}`] = {
-      // "20:00:00" で返るため、入力欄が扱う "20:00" に詰める
-      startTime: row.start_time ? String(row.start_time).slice(0, 5) : "",
-      endTime: row.end_time ? String(row.end_time).slice(0, 5) : "",
-    };
+    initial[`${row.cast_id}|${row.work_date}`] = String(
+      row.status ?? "undecided"
+    ) as ShiftStatus;
   }
 
   return (

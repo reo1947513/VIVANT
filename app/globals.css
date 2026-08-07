@@ -982,80 +982,97 @@ ul{ list-style:none; }
 }
 
 /* ===================== SCHEDULE（出勤情報） =====================
-   日付ごとのカードを縦に積む。スマートフォンでの閲覧が中心のため、
-   横に7列並べる表ではなく縦積みにしている（横スクロールを避ける）。 */
-.schedule-list{
-  display:grid;
-  gap:14px;
-  max-width:760px;
-  margin:0 auto;
-}
-.schedule-day{
-  display:grid;
-  grid-template-columns:132px 1fr;
-  align-items:center;
+   縦にキャスト・横に7日を並べた表。升目には ○ 出勤 / △ 未定 / ✕ 休み を出す。
+   スマートフォンでは7列が画面に収まらないため、表だけ横にずらせるようにし、
+   名前の列は左端に貼り付けて（position:sticky）行を見失わないようにしている。 */
+.schedule-legend{
+  display:flex;
+  justify-content:center;
   gap:18px;
-  padding:16px 20px;
-  background:var(--card);
-  border:1px solid var(--hairline);
-  border-radius:3px;
-}
-.schedule-date{
-  font-family:var(--font-serif);
-  font-size:1rem;
-  letter-spacing:.08em;
-  color:var(--ink);
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-.schedule-today{
-  font-family:var(--font-sans);
-  font-size:.62rem;
-  letter-spacing:.14em;
-  color:var(--orange-bright);
-  border:1px solid var(--orange-line);
-  border-radius:999px;
-  padding:2px 8px;
-}
-.schedule-casts{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
-.schedule-cast{
-  display:flex;
-  align-items:baseline;
-  gap:7px;
-  padding:5px 12px;
-  border:1px solid var(--hairline);
-  border-radius:999px;
-  background:rgba(207,106,30,0.06);
-}
-.schedule-name{
-  font-family:var(--font-roman);
-  font-size:.9rem;
-  letter-spacing:.06em;
-  color:var(--ink);
-}
-.schedule-time{
-  font-family:var(--font-num);
-  font-size:.82rem;
-  letter-spacing:.04em;
+  margin-bottom:16px;
+  font-size:.78rem;
+  letter-spacing:.1em;
   color:var(--ink-dim);
 }
-.schedule-off{
-  font-size:.85rem;
-  letter-spacing:.08em;
-  color:var(--ink-faint);
+.schedule-scroll{
+  max-width:860px;
+  margin:0 auto;
+  overflow-x:auto;
+  border:1px solid var(--hairline);
+  border-radius:3px;
+  background:var(--card);
+}
+.schedule-table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:560px;
+}
+.schedule-table th,
+.schedule-table td{
+  border-bottom:1px solid var(--hairline);
+  padding:12px 10px;
+  text-align:center;
+  white-space:nowrap;
+}
+.schedule-table tr:last-child th,
+.schedule-table tr:last-child td{
+  border-bottom:none;
+}
+.schedule-table thead th{
+  font-family:var(--font-serif);
+  font-size:.78rem;
+  font-weight:400;
+  letter-spacing:.06em;
+  color:var(--ink-dim);
+  background:rgba(207,106,30,0.05);
+}
+/* 名前の列。横にずらしても左端に残す */
+.schedule-castcol{
+  position:sticky;
+  left:0;
+  z-index:1;
+  text-align:left !important;
+  font-family:var(--font-roman);
+  font-size:.9rem;
+  font-weight:400;
+  letter-spacing:.06em;
+  color:var(--ink);
+  background:var(--card);
+}
+.schedule-table thead .schedule-castcol{
+  background:#241a13;
+}
+.schedule-today{
+  display:block;
+  margin-top:3px;
+  font-family:var(--font-sans);
+  font-size:.6rem;
+  letter-spacing:.14em;
+  color:var(--orange-bright);
+}
+.schedule-mark{
+  font-size:1.05rem;
+  line-height:1;
+}
+.schedule-mark--work{ color:var(--orange-bright); }
+.schedule-mark--undecided{ color:var(--ink-dim); }
+.schedule-mark--off{ color:var(--ink-faint); }
+
+/* 画面には出さず、読み上げにだけ伝える文字 */
+.sr-only{
+  position:absolute;
+  width:1px; height:1px;
+  padding:0; margin:-1px;
+  overflow:hidden;
+  clip-path:inset(50%);
+  white-space:nowrap;
+  border:0;
 }
 
 @media (max-width:860px){
-  .schedule-day{
-    grid-template-columns:1fr;
-    gap:10px;
-    padding:14px 16px;
-  }
+  .schedule-legend{ gap:14px; font-size:.72rem; }
+  .schedule-table th,
+  .schedule-table td{ padding:10px 8px; }
 }
 
 /* ===================== BLOG（お知らせ・記事） ===================== */

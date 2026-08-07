@@ -1,20 +1,38 @@
 import { formatDateLabel } from "../lib/date";
-import type { ShiftsByDate } from "../lib/queries/shifts";
+import type { ShiftWeek } from "../lib/queries/shifts";
+import type { ShiftStatus } from "../lib/types";
 
 /**
  * SCHEDULE：今日から7日分の出勤予定。
  *
- * 日付ごとに1枚のカードを縦に並べ、その日の出勤キャストを横に並べる形にしている。
- * 表（縦にキャスト・横に7日）にすると、スマートフォンでは横スクロールが必要になり読みにくい。
- * このページの閲覧はほとんどがスマートフォンなので、縦に積む形を選んだ。
+ * 縦にキャスト、横に7日を並べた表で、各升目に ○（出勤）△（未定）✕（休み）を出す。
+ * 休みの人も行に残るため、週全体の予定が一目で分かる。
  *
- * 出勤が1件も無い日は「お休み」と明示する。空欄のままだと、
- * 「まだ入力されていない」のか「休みなのか」が伝わらない。
+ * スマートフォンでは7列が画面に収まらないため、表だけを横にずらせるようにし、
+ * 名前の列は左端に固定して、どの行を見ているか分からなくならないようにしている。
+ *
+ * 全員が全日「未定」のときは区画ごと出さない。まだ何も入力されていない状態で
+ * △ が並ぶ表を見せても、来店の判断材料にならないため。
  */
-export default function Schedule({ week }: { week: ShiftsByDate }) {
-  // 1週間まったく登録が無いときは、区画ごと出さない（準備中の空表を見せない）
-  const hasAny = week.some((day) => day.shifts.length > 0);
-  if (!hasAny) return null;
+const MARKS: Record<ShiftStatus, string> = {
+  work: "○",
+  undecided: "△",
+  off: "✕",
+};
+
+const MARK_LABELS: Record<ShiftStatus, string> = {
+  work: "出勤",
+  undecided: "未定",
+  off: "休み",
+};
+
+export default function Schedule({ week }: { week: ShiftWeek }) {
+  if (week.casts.length === 0) return null;
+
+  const hasAnyDecided = week.casts.some((cast) =>
+    cast.statuses.some((status) => status !== "undecided")
+  );
+  if (!hasAnyDecided) return null;
 
   return (
     <section className="section section--alt" id="schedule">
@@ -25,34 +43,44 @@ export default function Schedule({ week }: { week: ShiftsByDate }) {
           <span className="rule"></span>
         </div>
 
-        <div className="schedule-list">
-          {week.map((day, index) => (
-            <div className="schedule-day reveal" key={day.date}>
-              <div className="schedule-date">
-                {formatDateLabel(day.date)}
-                {index === 0 && <span className="schedule-today">本日</span>}
-              </div>
+        <div className="schedule-legend reveal">
+          <span>○ 出勤</span>
+          <span>△ 未定</span>
+          <span>✕ 休み</span>
+        </div>
 
-              {day.shifts.length === 0 ? (
-                <p className="schedule-off">お休み</p>
-              ) : (
-                <ul className="schedule-casts">
-                  {day.shifts.map((shift) => (
-                    <li className="schedule-cast" key={shift.id}>
-                      <span className="schedule-name">{shift.castName}</span>
-                      {(shift.startTime || shift.endTime) && (
-                        <span className="schedule-time">
-                          {shift.startTime ?? ""}
-                          {shift.startTime && shift.endTime ? "〜" : ""}
-                          {shift.endTime ?? ""}
-                        </span>
-                      )}
-                    </li>
+        <div className="schedule-scroll reveal">
+          <table className="schedule-table">
+            <thead>
+              <tr>
+                <th className="schedule-castcol" scope="col">
+                  キャスト
+                </th>
+                {week.dates.map((date, index) => (
+                  <th key={date} scope="col">
+                    {formatDateLabel(date)}
+                    {index === 0 && <span className="schedule-today">本日</span>}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {week.casts.map((cast) => (
+                <tr key={cast.castId}>
+                  <th className="schedule-castcol" scope="row">
+                    {cast.castName}
+                  </th>
+                  {cast.statuses.map((status, index) => (
+                    <td key={week.dates[index]} className={`schedule-mark schedule-mark--${status}`}>
+                      <span aria-hidden="true">{MARKS[status]}</span>
+                      {/* 読み上げでは記号だけだと伝わらないため、言葉も持たせる */}
+                      <span className="sr-only">{MARK_LABELS[status]}</span>
+                    </td>
                   ))}
-                </ul>
-              )}
-            </div>
-          ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
