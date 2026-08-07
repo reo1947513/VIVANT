@@ -633,75 +633,60 @@ ul{ list-style:none; }
 }
 
 /* ===================== GALLERY ===================== */
-/* 暗闇に浮かぶ一枚岩（スラブ）。写真を貼った板が4枚、ほとんど隙間なく重なった塊で、
-   垂直の軸を中心に回り続ける。回転そのものは GalleryGrid 側で毎フレーム当てる。
+/* 大小を混ぜたモザイク。4列の格子に置き、先頭の1枚だけ縦横2つぶんを占める。
+   平坦な格子より誌面らしく見え、看板にしたい写真を目立たせられる。
 
-   立体に見せる仕組み：
-     .slab-stage に perspective（奥行きの見え方）を置き、
-     .slab に transform-style:preserve-3d を置いて子の板を空間に配置する。
-     板は translateZ で手前から奥へ10pxずつずらす。真横を向いた瞬間に、
-     このずれが「重なった4層の厚み」として見える。 */
-.slab-stage{
-  perspective:1100px;
-  perspective-origin:50% 45%;
+   升目が正方形になる理屈：小さい枠は下の .gallery-grid .ph で縦横比1対1にしてあり、
+   行の高さは列の幅と等しくなる。先頭の枠は2行2列ぶんなので、
+   幅も高さも「列幅×2＋隙間」となり、こちらも正方形に収まる。
+
+   幅の狭い画面では下の @media で横に流れる形へ切り替える。 */
+.gallery-grid{
   display:grid;
-  place-items:center;
-  min-height:min(78vh, 660px);
-  position:relative;
+  grid-template-columns:repeat(4, 1fr);
+  gap:14px;
+  max-width:860px;
+  margin:0 auto;
 }
-/* 塊の真下に落ちる影。宙に浮いていることを示す */
-.slab-stage::after{
-  content:"";
-  position:absolute;
-  left:50%; bottom:6%;
-  width:min(46vw, 240px); height:26px;
-  transform:translateX(-50%);
-  background:radial-gradient(ellipse at center, rgba(0,0,0,.62), transparent 70%);
-  filter:blur(6px);
-  pointer-events:none;
+.gallery-grid .gallery-tile:first-child{
+  grid-column:span 2;
+  grid-row:span 2;
 }
-.slab{
-  --w:min(58vw, 300px);
-  position:relative;
-  width:var(--w);
-  aspect-ratio:3/4;
-  transform-style:preserve-3d;
-  will-change:transform;
-  /* ボタンの既定の装飾を打ち消す */
-  margin:0; padding:0; border:none; background:none;
+/* 写真の枠は、現れる演出を短くする（共通は1秒）。
+   読み込みが終わっていても濃くなるまで1秒待たされ、遅く感じる原因になっていた。 */
+.gallery-grid .gallery-tile.reveal{
+  transition-duration:.45s;
+}
+
+/* 枠は押せるボタン。見た目はこれまでの枠のまま、ボタンの既定の装飾だけ打ち消す */
+.gallery-grid .gallery-tile{
+  margin:0; padding:0;
   font:inherit; color:inherit;
   -webkit-appearance:none; appearance:none;
   cursor:zoom-in;
 }
-.slab:focus-visible{
+.gallery-grid .gallery-tile:focus-visible{
   outline:2px solid var(--orange-bright);
-  outline-offset:14px;
+  outline-offset:2px;
 }
-/* 4枚を90度ずつ回して、板の幅の半分だけ外へ押し出す。
-   押し出す量を「幅の半分」にすると4枚の端がちょうど接し、
-   断面が正方形の柱（＝縦長の塊）になる。回ると面が入れ替わり、
-   斜めのときは2面と接合部の稜線が見えて厚みが出る。 */
-.slab-panel{
+.gallery-grid .ph{
+  aspect-ratio:1/1;
+  border-radius:4px;
+  background:linear-gradient(150deg, #2a1c12, #18100b);
+  border:1px solid var(--hairline);
+  position:relative;
+}
+.gallery-grid .ph::after{
+  content:"PHOTO";
   position:absolute; inset:0;
-  overflow:hidden;
-  background:#0d0906;
-  border:1px solid rgba(207,106,30,0.26);
-  transform:rotateY(calc(var(--i) * 90deg)) translateZ(calc(var(--w) / 2));
+  display:grid; place-items:center;
+  color:var(--ink-faint);
+  font-family:var(--font-roman);
+  font-size:.7rem; letter-spacing:.25em;
 }
-/* 影は板に付けない。4枚が立体で交差するため、真横を向いた板の影が
-   正面の板の上に重なって写真を黒く潰してしまう（実機で確認）。
-   浮遊感は .slab-stage::after の床影で出す。 */
-.slab-panel img{
-  width:100%; height:100%;
-  object-fit:cover;
-  display:block;
-  -webkit-user-select:none; user-select:none;
-  -webkit-touch-callout:none;
-}
-/* 面に重ねる陰影は置かない。
-   立体（preserve-3d）の中で疑似要素を重ねると、板の内側と外側の重なり順が
-   崩れて写真が真っ黒に潰れる現象を実機で確認したため（透明度に関係なく起きる）。
-   陰影が要るときは、板そのものへ filter を掛ける形にすること。 */
+/* 画像ファイルが存在しない枠（サーバー側の判定で .ph--empty が付く）は、
+   写真待ちであることが伝わるよう「NO IMAGE」と明示する。 */
+.gallery-grid .ph--empty::after{ content:"NO IMAGE"; }
 
 /* ----- 写真の拡大表示（枠を押すと開く暗幕） -----
    ヘッダー(z-index:100)・モバイルナビ(99)・トップに戻る(90)より前に出す必要があるため 200。
@@ -954,10 +939,34 @@ ul{ list-style:none; }
 @media (max-width:680px){
   .features-grid{ grid-template-columns:repeat(2,1fr); }
 
-  /* 塊は狭い画面では少し大きく見せる（周囲に他の要素が無いため）。
-     押し出す量は幅から計算するので、変数を書き換えれば箱の形は保たれる */
-  .slab{ --w:min(70vw, 300px); }
-  .slab-stage{ min-height:min(70vh, 560px); }
+  /* スマートフォンでは横に流れる見せ方にする。
+     枠を横一列に並べて横スクロールにし、指を離した位置で写真が中央に収まるよう
+     スナップさせる（scroll-snap）。自動送りは GalleryGrid 側から行う。
+     縦に積むと枚数ぶん画面が長くなるが、横に流せば高さは一定に保てる。 */
+  .gallery-grid{
+    display:flex;
+    grid-template-columns:none;
+    max-width:none;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    /* 画面の端まで使う。外へ広げる量は .wrap の余白と必ず同じにする
+       （決め打ちの数値だと、余白が変わる画面幅でページごと横にはみ出す）。
+       端の写真も中央に来られるよう、内側に左右の余白を確保する。 */
+    padding:0 15vw;
+    margin:0 calc(-1 * var(--wrap-pad));
+  }
+  .gallery-grid::-webkit-scrollbar{ display:none; }
+  .gallery-grid .gallery-tile{
+    flex:0 0 70vw;
+    scroll-snap-align:center;
+  }
+  /* 横流しでは先頭だけ大きくする意味がないため、モザイクの指定を戻す */
+  .gallery-grid .gallery-tile:first-child{
+    grid-column:auto;
+    grid-row:auto;
+  }
 }
 @media (max-width:600px){
   .reserve-grid{ grid-template-columns:1fr; }
@@ -1018,7 +1027,8 @@ ul{ list-style:none; }
 }
 /* images/ から相対パスで読み込む写真。ファイルが無ければ onerror で隠れ、下のCSSプレースホルダが見える */
 .hero-photo .ph-img,
-.cast-photo .ph-img{
+.cast-photo .ph-img,
+.gallery-grid .ph .ph-img{
   position:absolute; inset:0;
   width:100%; height:100%;
   object-fit:cover;
@@ -1026,6 +1036,7 @@ ul{ list-style:none; }
   z-index:1;
 }
 .cast-photo .ph-img{ object-position:center top; }
+.gallery-grid .ph{ overflow:hidden; }
 
 /* キャストが1人も登録されていないときの案内（管理画面から人数が変わるようになったため追加） */
 .cast-empty{
