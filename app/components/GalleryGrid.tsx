@@ -134,16 +134,20 @@ export default function GalleryGrid({ images }: { images: GalleryImage[] }) {
             onClick={(e) => open(index, e)}
             aria-label={`${labelOf(image, index)}を拡大表示する`}
           >
-            {/* パソコンは1辺240pxの枠、スマートフォンは画面幅の7割ほど。
-                倍の解像度でも粗くならないよう480pxで用意し、原寸は配らない
-                （受信量が10分の1以下になる） */}
+            {/* 配る大きさは置かれる枠に合わせる。パソコンでは先頭だけ2倍の枠、
+                スマートフォンでは画面幅の7割。倍の解像度でも粗くならない範囲で
+                用意し、原寸は配らない（受信量が10分の1以下になる） */}
             <Image
               className="ph-img"
               src={image.imageUrl}
               alt={labelOf(image, index)}
-              width={480}
-              height={480}
-              sizes="(max-width: 680px) 70vw, 240px"
+              width={index === 0 ? 840 : 420}
+              height={index === 0 ? 840 : 420}
+              sizes={
+                index === 0
+                  ? "(max-width: 680px) 70vw, 420px"
+                  : "(max-width: 680px) 70vw, 205px"
+              }
               loading="lazy"
             />
           </button>

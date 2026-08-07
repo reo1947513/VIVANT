@@ -624,14 +624,24 @@ ul{ list-style:none; }
 }
 
 /* ===================== GALLERY ===================== */
-/* 枠は正方形・大きさ固定。1行に入るだけ並べて折り返し、余った幅は左右に分けて中央へ寄せる。
-   枚数が増えても写真1枚の大きさは変わらない（画面幅に合わせて伸び縮みしない）。
-   幅の狭い画面だけは下の @media で横2列に切り替える。 */
+/* 大小を混ぜたモザイク。4列の格子に置き、先頭の1枚だけ縦横2つぶんを占める。
+   平坦な格子より誌面らしく見え、看板にしたい写真を目立たせられる。
+
+   升目が正方形になる理屈：小さい枠は下の .gallery-grid .ph で縦横比1対1にしてあり、
+   行の高さは列の幅と等しくなる。先頭の枠は2行2列ぶんなので、
+   幅も高さも「列幅×2＋隙間」となり、こちらも正方形に収まる。
+
+   幅の狭い画面では下の @media で横に流れる形へ切り替える。 */
 .gallery-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit, 240px);
-  justify-content:center;
+  grid-template-columns:repeat(4, 1fr);
   gap:14px;
+  max-width:860px;
+  margin:0 auto;
+}
+.gallery-grid .gallery-tile:first-child{
+  grid-column:span 2;
+  grid-row:span 2;
 }
 /* 枠は押せるボタン。見た目はこれまでの枠のまま、ボタンの既定の装飾だけ打ち消す */
 .gallery-grid .gallery-tile{
@@ -921,6 +931,7 @@ ul{ list-style:none; }
   .gallery-grid{
     display:flex;
     grid-template-columns:none;
+    max-width:none;
     overflow-x:auto;
     scroll-snap-type:x mandatory;
     -webkit-overflow-scrolling:touch;
@@ -933,6 +944,11 @@ ul{ list-style:none; }
   .gallery-grid .gallery-tile{
     flex:0 0 70vw;
     scroll-snap-align:center;
+  }
+  /* 横流しでは先頭だけ大きくする意味がないため、モザイクの指定を戻す */
+  .gallery-grid .gallery-tile:first-child{
+    grid-column:auto;
+    grid-row:auto;
   }
 }
 @media (max-width:600px){
