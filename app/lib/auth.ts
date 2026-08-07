@@ -3,6 +3,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "./supabase/server";
+import { getAdminSupabase } from "./supabase/admin";
 import { optionalEnv } from "./supabase/env";
 
 /**
@@ -17,9 +18,13 @@ import { optionalEnv } from "./supabase/env";
  *   の二重で守るほうが確実で、余計な通信も増えない。
  *
  * 管理者かどうかは2箇所で判定している：
- *   - ここ（環境変数 ADMIN_EMAIL との一致）… 画面に「権限がありません」と出すため
+ *   - ここ（環境変数 ADMIN_EMAIL、または admin_emails 表に載っているか）
+ *     … 画面に「権限がありません」と出すため
  *   - データベース側（admin_emails 表と is_admin 関数）… 実際の読み書きを止めるため
  *   アプリ側だけだと守りとして不十分で、DB側だけだと原因が分かりにくい。両方に置く。
+ *
+ * 管理者を増やすときは scripts/add-admin.mjs を使う（ログイン用の利用者を作り、
+ * admin_emails 表にも載せる）。環境変数の書き換えと再デプロイは要らない。
  */
 
 export type AdminUser = { id: string; email: string };
@@ -30,10 +35,6 @@ export type AdminUser = { id: string; email: string };
  */
 export const getAdminUser = cache(async (): Promise<AdminUser | null> => {
   const allowedEmail = optionalEnv("ADMIN_EMAIL").trim().toLowerCase();
-  if (!allowedEmail) {
-    console.error("[vivant] ADMIN_EMAIL が未設定のため、管理画面には入れません");
-    return null;
-  }
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -44,7 +45,28 @@ export const getAdminUser = cache(async (): Promise<AdminUser | null> => {
     } = await supabase.auth.getUser();
 
     if (!user?.email) return null;
-    if (user.email.trim().toLowerCase() !== allowedEmail) return null;
+    const email = user.email.trim().toLowerCase();
+
+    // 1人目（オーナー）は環境変数で許す。環境変数を消すと締め出される事故を防ぐため、
+    // この判定は残しておく。
+    if (allowedEmail && email === allowedEmail) {
+      return { id: user.id, email: user.email };
+    }
+
+    // 2人目以降は admin_emails 表で許す。ここが台帳の本体で、
+    // 追加のたびに環境変数を書き換えて再デプロイする必要がない。
+    // この表は行レベルセキュリティで誰も読めないため、秘密キーを使う側から確認する。
+    const { data, error } = await getAdminSupabase()
+      .from("admin_emails")
+      .select("email")
+      .eq("email", email)
+      .maybeSingle();
+
+    if (error) {
+      console.error("[vivant] 管理者台帳の確認に失敗しました:", error.message);
+      return null;
+    }
+    if (!data) return null;
 
     return { id: user.id, email: user.email };
   } catch (e) {

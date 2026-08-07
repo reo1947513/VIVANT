@@ -9,7 +9,8 @@
     "seed:casts": "node scripts/seed-casts.mjs",
     "add:cast": "node scripts/add-cast.mjs",
     "add:gallery": "node scripts/add-gallery.mjs",
-    "seed:test": "node scripts/seed-test-content.mjs"
+    "seed:test": "node scripts/seed-test-content.mjs",
+    "add:admin": "node scripts/add-admin.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
