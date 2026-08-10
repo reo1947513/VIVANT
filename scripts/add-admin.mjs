@@ -98,4 +98,7 @@ if (listError) {
 }
 
 console.log(`台帳に載せました: ${email}`);
-console.log("これで /admin にログインできます。初回ログイン後にパスワードを変更してください。");
+console.log(
+  "これで管理画面（住所は app/lib/adminPath.ts の ADMIN_BASE）にログインできます。" +
+    "初回ログイン後にパスワードを変更してください。"
+);

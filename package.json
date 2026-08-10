@@ -10,6 +10,7 @@
     "add:cast": "node scripts/add-cast.mjs",
     "add:gallery": "node scripts/add-gallery.mjs",
     "seed:test": "node scripts/seed-test-content.mjs",
+    "clean:test": "node scripts/clean-test-shifts.mjs",
     "add:admin": "node scripts/add-admin.mjs",
     "img:webp": "node scripts/convert-webp.mjs"
   },
