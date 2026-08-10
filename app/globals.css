@@ -339,15 +339,67 @@ ul{ list-style:none; }
 .btn-ghost{ color:var(--ink); border:1px solid var(--orange-line); }
 .btn-ghost:hover{ background:rgba(207,106,30,0.10); border-color:var(--orange); transform:translateY(-2px); }
 
-/* ヒーロー写真プレースホルダ */
+/* ヒーロー写真プレースホルダ
+   写真を線で四角く囲むと、暗い背景との明度差で切り抜きを貼ったように見えていた。
+   線をやめて縁を背景へ消し込み、写真の後ろに暖色の光を置いて地に馴染ませる。 */
+.hero-right{
+  position:relative;
+}
+/* 写真の背後の光。背景画像が持つ金色の光と写真をつなぐ役目で、
+   これが無いと消し込んだ縁が「ただ薄れただけ」に見える。 */
+.hero-right::before{
+  content:"";
+  position:absolute;
+  inset:-9% -7%;
+  z-index:0;
+  background:radial-gradient(58% 58% at 52% 50%,
+    rgba(207,106,30,0.15),
+    rgba(207,106,30,0.05) 55%,
+    transparent 78%);
+  filter:blur(22px);
+  pointer-events:none;
+}
 .hero-photo{
   aspect-ratio:4/3;            /* 実画像（750×566≒4:3）に合わせた横長。cover で左右が切れない */
-  border-radius:4px;
-  border:1px solid var(--orange-line);
   background:
     linear-gradient(145deg, #2a1c12 0%, #1a120c 55%, #241810 100%);
   position:relative;
+  z-index:1;                   /* 背後の光より前に置く */
   overflow:hidden;
+  /* 四方の縁を透明へ落として背景へ溶かす。左右は10%、上下は8%かけて消す。
+     2枚の帯を掛け合わせる（intersect）ことで四隅も自然に薄くなる。
+     -webkit- 付きは古い Safari 向けの控え。 */
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 8%, #000 89%, transparent 100%);
+  -webkit-mask-composite:source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, #000 8%, #000 89%, transparent 100%);
+  mask-composite:intersect;
+}
+/* 写真の上に重ねる陰。文字に近い左端、明るい天井が写る上端、
+   白い機器が並ぶ下端を順に沈め、中央の席まわりだけを見せる。 */
+.hero-photo::before{
+  content:"";
+  position:absolute; inset:0;
+  z-index:2;
+  pointer-events:none;
+  background:
+    /* 右下に写る白い機材が一番明るく、そこだけ手前へ出て見えるので先に沈める */
+    radial-gradient(58% 58% at 88% 86%, rgba(16,11,7,0.50), transparent 72%),
+    linear-gradient(to right, rgba(16,11,7,0.62) 0%, rgba(16,11,7,0.14) 24%, transparent 48%),
+    linear-gradient(to left, rgba(16,11,7,0.44) 0%, rgba(16,11,7,0.10) 22%, transparent 44%),
+    linear-gradient(to top, rgba(16,11,7,0.46) 0%, transparent 34%),
+    linear-gradient(to bottom, rgba(16,11,7,0.50) 0%, transparent 30%),
+    radial-gradient(118% 104% at 54% 48%, transparent 42%, rgba(16,11,7,0.44) 100%);
+}
+/* 写真そのものの色。橙の壁と白い機器が背景より明るく、そこだけ別の場所に
+   見えていたため、明るさと彩度を落とし、わずかに暖色へ寄せて空気を揃える。
+   併せて少しだけ拡大し、外周の間延びした天井と機器を画面外へ逃がす。 */
+.hero-photo .ph-img{
+  filter:brightness(0.86) contrast(1.06) saturate(0.80) sepia(0.08);
+  transform:scale(1.05);
 }
 .hero-photo::after{
   content:"ここに店内メイン写真";
@@ -934,6 +986,14 @@ ul{ list-style:none; }
   }
   .hero .wrap{ grid-template-columns:1fr; gap:40px; }
   .hero-photo{ order:-1; aspect-ratio:4/3; }   /* モバイルも同じ横長比率で左右を切らない */
+  /* 縦積みでは文章が写真の左ではなく下に来るため、左端だけを濃く沈める理由が無い。
+     左右を均等にし、上下の陰をわずかに強めて写真の輪郭を目立たせない。 */
+  .hero-photo::before{
+    background:
+      linear-gradient(to top, rgba(16,11,7,0.52) 0%, transparent 36%),
+      linear-gradient(to bottom, rgba(16,11,7,0.52) 0%, transparent 32%),
+      radial-gradient(118% 104% at 50% 48%, transparent 40%, rgba(16,11,7,0.46) 100%);
+  }
   .hero-left{ text-align:center; }
   .hero-left .h-mono{ margin-left:auto; margin-right:auto; }
   .hero-cta{ justify-content:center; }
