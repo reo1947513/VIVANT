@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../../admin.module.css";
+import { adminPath } from "../../../lib/adminPath";
 
 /**
  * 記事の作成・編集フォーム。
@@ -130,7 +131,7 @@ export default function PostForm({ initial }: { initial: PostFormValues }) {
         }
       }
 
-      router.push("/admin/posts");
+      router.push(adminPath("posts"));
       router.refresh();
     } catch {
       setError("通信に失敗しました。");
@@ -259,7 +260,7 @@ export default function PostForm({ initial }: { initial: PostFormValues }) {
         <button
           className={styles.btnSecondary}
           type="button"
-          onClick={() => router.push("/admin/posts")}
+          onClick={() => router.push(adminPath("posts"))}
           disabled={saving}
         >
           キャンセル

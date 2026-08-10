@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getAdminUser } from "../../lib/auth";
+import { ADMIN_HOME_PATH } from "../../lib/adminPath";
 import LoginForm from "./LoginForm";
 import styles from "../admin.module.css";
 
@@ -13,7 +14,7 @@ import styles from "../admin.module.css";
 export const dynamic = "force-dynamic";
 
 export default async function LoginPage() {
-  if (await getAdminUser()) redirect("/admin/casts");
+  if (await getAdminUser()) redirect(ADMIN_HOME_PATH);
 
   return (
     <div className={styles.shell}>

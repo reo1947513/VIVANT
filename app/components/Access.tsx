@@ -5,7 +5,7 @@ import SnsIcon from "./SnsIcon";
 /**
  * ACCESS：左に店舗情報、右に Google マップ埋め込み（APIキー不要・output=embed）。
  * 住所・電話・営業・定休は確定実データ。
- * SNSは管理画面（/admin/links）で入れたURLの分だけ並ぶ。
+ * SNSは管理画面のSNSリンク画面で入れたURLの分だけ並ぶ。
  * 店舗情報・地図クエリは app/data/siteData.ts に一元管理。
  */
 export default async function Access() {

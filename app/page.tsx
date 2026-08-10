@@ -21,8 +21,9 @@ import { getPublishedPosts } from "./lib/queries/posts";
  * BAR VIVANT 集客LP。
  * Desktop 単一HTML版の見た目・挙動を Next.js(App Router) のセクション分割で再現している。
  *
- * キャスト・ギャラリー・出勤情報・ブログは管理画面（/admin）から更新できるよう
+ * キャスト・ギャラリー・出勤情報・ブログは管理画面から更新できるよう
  * Supabase で管理している。店舗の固定情報（住所・料金など）は app/data/siteData.ts。
+ * 管理画面の住所は app/lib/adminPath.ts にまとめてある。
  *
  * revalidate：作った内容を5分間そのまま配り、その後の最初のアクセスで作り直す。
  *   管理画面で保存したときは、その場で作り直しを指示している（app/lib/revalidate.ts）ため

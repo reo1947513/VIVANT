@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getAdminSupabase } from "../../../lib/supabase/admin";
+import { adminPath } from "../../../lib/adminPath";
 import CastTable, { type CastRow } from "./CastTable";
 import styles from "../../admin.module.css";
 
@@ -32,7 +33,7 @@ export default async function CastsPage() {
             上から順にサイトへ表示されます。非公開にすると、サイトからは見えなくなります。
           </p>
         </div>
-        <Link className={styles.btnLink} href="/admin/casts/new">
+        <Link className={styles.btnLink} href={adminPath("casts/new")}>
           新規追加
         </Link>
       </div>

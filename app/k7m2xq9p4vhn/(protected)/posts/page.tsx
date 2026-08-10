@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getAdminSupabase } from "../../../lib/supabase/admin";
+import { adminPath } from "../../../lib/adminPath";
 import PostTable, { type PostRow } from "./PostTable";
 import styles from "../../admin.module.css";
 
@@ -27,7 +28,7 @@ export default async function PostsPage() {
             公開した記事は /blog に一覧で並び、トップページには最新3件が出ます。
           </p>
         </div>
-        <Link className={styles.btnLink} href="/admin/posts/new">
+        <Link className={styles.btnLink} href={adminPath("posts/new")}>
           新規作成
         </Link>
       </div>

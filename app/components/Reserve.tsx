@@ -4,7 +4,7 @@ import { getSiteLinks } from "../lib/queries/links";
 /**
  * RESERVE / CONTACT：電話予約と SNS でのお問い合わせを左右2カラム。
  *
- * SNSのボタンは管理画面（/admin/links）で入れたURLから作る。
+ * SNSのボタンは管理画面のSNSリンク画面で入れたURLから作る。
  * URLが空のSNSは行ごと出ない（押しても何も起きないボタンを出さないため）。
  * 1つも登録が無いときだけ「準備中」と出す。
  *

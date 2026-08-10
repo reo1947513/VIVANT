@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../../admin.module.css";
 import type { ShiftStatus } from "../../../lib/types";
+import { adminPath } from "../../../lib/adminPath";
 
 /**
  * 出勤の週表。縦にキャスト、横に7日を並べ、各升目で ○ △ ✕ を選ぶ。
@@ -116,7 +117,7 @@ export default function ShiftWeekGrid({
         <button
           className={styles.btnSecondary}
           type="button"
-          onClick={() => router.push(`/admin/shifts?week=${prevWeek}`)}
+          onClick={() => router.push(adminPath(`shifts?week=${prevWeek}`))}
         >
           ← 前の週
         </button>
@@ -127,7 +128,7 @@ export default function ShiftWeekGrid({
         <button
           className={styles.btnSecondary}
           type="button"
-          onClick={() => router.push(`/admin/shifts?week=${nextWeek}`)}
+          onClick={() => router.push(adminPath(`shifts?week=${nextWeek}`))}
         >
           次の週 →
         </button>
@@ -135,7 +136,7 @@ export default function ShiftWeekGrid({
           <button
             className={styles.btnSecondary}
             type="button"
-            onClick={() => router.push("/admin/shifts")}
+            onClick={() => router.push(adminPath("shifts"))}
           >
             今週へ戻る
           </button>

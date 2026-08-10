@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../../admin.module.css";
+import { adminPath } from "../../../lib/adminPath";
 
 /**
  * キャストの追加・編集フォーム。
@@ -91,7 +92,7 @@ export default function CastForm({ initial }: { initial: CastFormValues }) {
         }
       }
 
-      router.push("/admin/casts");
+      router.push(adminPath("casts"));
       router.refresh();
     } catch {
       setError("通信に失敗しました。");
@@ -187,7 +188,7 @@ export default function CastForm({ initial }: { initial: CastFormValues }) {
         <button
           className={styles.btnSecondary}
           type="button"
-          onClick={() => router.push("/admin/casts")}
+          onClick={() => router.push(adminPath("casts"))}
           disabled={saving}
         >
           キャンセル

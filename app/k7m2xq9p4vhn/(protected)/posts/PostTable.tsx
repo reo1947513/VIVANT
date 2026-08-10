@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "../../admin.module.css";
+import { adminPath } from "../../../lib/adminPath";
 
 /** 記事一覧の表。公開切替と削除をここで行う */
 export type PostRow = {
@@ -94,7 +95,10 @@ export default function PostTable({ posts }: { posts: PostRow[] }) {
                 </td>
                 <td>
                   <div className={styles.rowActions}>
-                    <Link className={styles.iconBtn} href={`/admin/posts/${post.id}/edit`}>
+                    <Link
+                      className={styles.iconBtn}
+                      href={adminPath(`posts/${post.id}/edit`)}
+                    >
                       編集
                     </Link>
                     {/* 押せなくするのはその行だけ。表全体を止めると重く感じるため */}

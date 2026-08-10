@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "../../admin.module.css";
+import { adminPath } from "../../../lib/adminPath";
 
 /**
  * キャスト一覧の表。並び替え・公開の切替・削除をここで行う。
@@ -416,7 +417,10 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
                   </td>
                   <td>
                     <div className={styles.rowActions}>
-                      <Link className={styles.iconBtn} href={`/admin/casts/${cast.id}/edit`}>
+                      <Link
+                        className={styles.iconBtn}
+                        href={adminPath(`casts/${cast.id}/edit`)}
+                      >
                         編集
                       </Link>
                       <button

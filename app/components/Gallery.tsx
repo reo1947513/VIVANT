@@ -5,7 +5,7 @@ import GalleryGrid from "./GalleryGrid";
 /**
  * GALLERY：店内写真のグリッドと、TikTok への誘導ボタン。
  *
- * 写真は管理画面（/admin/gallery）から登録し、Supabase で管理している。
+ * 写真は管理画面のギャラリー画面から登録し、Supabase で管理している。
  * 以前は 01.jpg〜08.jpg の8枠固定だったが、枚数を自由にできるようにした。
  *
  * 1枚も登録が無いときは、この区画そのものを出さない。

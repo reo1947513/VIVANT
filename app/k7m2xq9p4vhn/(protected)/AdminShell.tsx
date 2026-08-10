@@ -3,18 +3,22 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import styles from "../admin.module.css";
+import { ADMIN_LOGIN_PATH, adminPath } from "../../lib/adminPath";
 
 /**
  * 管理画面の枠（ヘッダーとナビ）。
  * 現在地の判定とログアウトの操作があるためブラウザ側で動かす。
  * 認証そのものは親のレイアウト（サーバー側）で済んでいる。
+ *
+ * 住所は app/lib/adminPath.ts の ADMIN_BASE から組み立てる。
+ * ここに直接書かないのは、管理画面の住所を変えるときの直し漏れを防ぐため。
  */
 const NAV = [
-  { href: "/admin/casts", label: "キャスト", preview: "/#cast" },
-  { href: "/admin/gallery", label: "ギャラリー", preview: "/#gallery" },
-  { href: "/admin/shifts", label: "出勤情報", preview: "/#schedule" },
-  { href: "/admin/posts", label: "ブログ", preview: "/blog" },
-  { href: "/admin/links", label: "SNSリンク", preview: "/#reserve" },
+  { href: adminPath("casts"), label: "キャスト", preview: "/#cast" },
+  { href: adminPath("gallery"), label: "ギャラリー", preview: "/#gallery" },
+  { href: adminPath("shifts"), label: "出勤情報", preview: "/#schedule" },
+  { href: adminPath("posts"), label: "ブログ", preview: "/blog" },
+  { href: adminPath("links"), label: "SNSリンク", preview: "/#reserve" },
 ] as const;
 
 /**
@@ -37,7 +41,7 @@ export default function AdminShell({
 
   async function onLogout() {
     await fetch("/api/admin/logout", { method: "POST" });
-    router.replace("/admin/login");
+    router.replace(ADMIN_LOGIN_PATH);
     router.refresh();
   }
 

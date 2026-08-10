@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../admin.module.css";
+import { ADMIN_HOME_PATH } from "../../lib/adminPath";
 
 /**
  * ログインフォーム。
@@ -37,7 +38,7 @@ export default function LoginForm() {
       }
 
       // 認証状態はサーバー側で判定しているため、移動前に最新の状態を読み直させる
-      router.replace("/admin/casts");
+      router.replace(ADMIN_HOME_PATH);
       router.refresh();
     } catch {
       setError("通信に失敗しました。時間をおいて試してください。");

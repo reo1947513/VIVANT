@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "./supabase/server";
 import { getAdminSupabase } from "./supabase/admin";
 import { optionalEnv } from "./supabase/env";
+import { ADMIN_LOGIN_PATH } from "./adminPath";
 
 /**
  * 管理画面の認証。
@@ -25,6 +26,9 @@ import { optionalEnv } from "./supabase/env";
  *
  * 管理者を増やすときは scripts/add-admin.mjs を使う（ログイン用の利用者を作り、
  * admin_emails 表にも載せる）。環境変数の書き換えと再デプロイは要らない。
+ *
+ * 管理画面の住所は app/lib/adminPath.ts にまとめてある。住所を隠しているのは
+ * 人目に触れさせないための目隠しで、守りの本体はここの確認とデータベース側にある。
  */
 
 export type AdminUser = { id: string; email: string };
@@ -78,7 +82,7 @@ export const getAdminUser = cache(async (): Promise<AdminUser | null> => {
 /** 画面用。管理者でなければログイン画面へ送る */
 export async function requireAdmin(): Promise<AdminUser> {
   const user = await getAdminUser();
-  if (!user) redirect("/admin/login");
+  if (!user) redirect(ADMIN_LOGIN_PATH);
   return user;
 }
 
