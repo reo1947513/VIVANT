@@ -34,12 +34,46 @@ import { ADMIN_LOGIN_PATH } from "./adminPath";
 export type AdminUser = { id: string; email: string };
 
 /**
+ * そのメールアドレスが管理者として許されているかを返す。
+ *
+ * 判定は2段。環境変数 ADMIN_EMAIL に一致するか、admin_emails 表に載っているか。
+ * ログイン後の確認（getAdminUser）と、ログインの入口（/api/admin/login）の
+ * 両方から呼ぶ。ここを共通にしておかないと、
+ * 「台帳に追加したのにログインできない」という食い違いが起きる。
+ * 実際、以前はログインの入口だけが環境変数の1件しか通さず、
+ * 台帳に追加した2人目以降が入れない状態になっていた。
+ *
+ * 台帳は行レベルセキュリティで誰も読めないため、秘密キーを使う側から確認する。
+ */
+export async function isAdminEmail(rawEmail: string): Promise<boolean> {
+  const email = rawEmail.trim().toLowerCase();
+  if (!email) return false;
+
+  // 1人目（オーナー）は環境変数で許す。環境変数を消すと締め出される事故を防ぐため、
+  // この判定は残しておく。
+  const allowedEmail = optionalEnv("ADMIN_EMAIL").trim().toLowerCase();
+  if (allowedEmail && email === allowedEmail) return true;
+
+  // 2人目以降は admin_emails 表で許す。ここが台帳の本体で、
+  // 追加のたびに環境変数を書き換えて再デプロイする必要がない。
+  const { data, error } = await getAdminSupabase()
+    .from("admin_emails")
+    .select("email")
+    .eq("email", email)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[vivant] 管理者台帳の確認に失敗しました:", error.message);
+    return false;
+  }
+  return Boolean(data);
+}
+
+/**
  * ログイン中の管理者を返す。管理者でなければ null。
  * cache() で包んでいるので、1回のリクエストの中で何度呼んでも問い合わせは1回で済む。
  */
 export const getAdminUser = cache(async (): Promise<AdminUser | null> => {
-  const allowedEmail = optionalEnv("ADMIN_EMAIL").trim().toLowerCase();
-
   try {
     const supabase = await createSupabaseServerClient();
     // getSession ではなく getUser を使う。getSession は cookie の中身をそのまま信じるが、
@@ -49,28 +83,8 @@ export const getAdminUser = cache(async (): Promise<AdminUser | null> => {
     } = await supabase.auth.getUser();
 
     if (!user?.email) return null;
-    const email = user.email.trim().toLowerCase();
 
-    // 1人目（オーナー）は環境変数で許す。環境変数を消すと締め出される事故を防ぐため、
-    // この判定は残しておく。
-    if (allowedEmail && email === allowedEmail) {
-      return { id: user.id, email: user.email };
-    }
-
-    // 2人目以降は admin_emails 表で許す。ここが台帳の本体で、
-    // 追加のたびに環境変数を書き換えて再デプロイする必要がない。
-    // この表は行レベルセキュリティで誰も読めないため、秘密キーを使う側から確認する。
-    const { data, error } = await getAdminSupabase()
-      .from("admin_emails")
-      .select("email")
-      .eq("email", email)
-      .maybeSingle();
-
-    if (error) {
-      console.error("[vivant] 管理者台帳の確認に失敗しました:", error.message);
-      return null;
-    }
-    if (!data) return null;
+    if (!(await isAdminEmail(user.email))) return null;
 
     return { id: user.id, email: user.email };
   } catch (e) {

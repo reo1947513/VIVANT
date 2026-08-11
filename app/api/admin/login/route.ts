@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createSupabaseServerClient } from "../../../lib/supabase/server";
-import { optionalEnv } from "../../../lib/supabase/env";
+import { isAdminEmail } from "../../../lib/auth";
 
 /**
  * 管理画面へのログイン。
@@ -11,8 +11,9 @@ import { optionalEnv } from "../../../lib/supabase/env";
  *   画面の描画中（サーバーコンポーネント）からは cookie を書けないため、
  *   書き込みができるこの場所で行う。
  *
- * 許可メール以外は、Supabase の認証が通っていても弾く。
+ * 管理者以外は、Supabase の認証が通っていても弾く。
  * 現在は新規登録を止めているので該当者は出ないはずだが、設定が戻された場合の保険。
+ * 誰を管理者とみなすかは app/lib/auth.ts の isAdminEmail に一本化してある。
  */
 const schema = z.object({
   email: z.email("メールアドレスの形式が正しくありません。"),
@@ -35,17 +36,17 @@ export async function POST(request: Request) {
     );
   }
 
-  const allowedEmail = optionalEnv("ADMIN_EMAIL").trim().toLowerCase();
-  if (!allowedEmail) {
-    console.error("[vivant] ADMIN_EMAIL が未設定です");
-    return NextResponse.json(
-      { error: "管理画面の設定が未完了です。" },
-      { status: 500 }
-    );
-  }
+  /*
+    認証を試す前に、管理者かどうかを先に確かめる。
+    総当たりで別アカウントを探られても、ここで止まるため。
 
-  // 認証を試す前に弾く。総当たりで別アカウントを探られても、ここで止まる
-  if (parsed.data.email.trim().toLowerCase() !== allowedEmail) {
+    判定は app/lib/auth.ts の isAdminEmail に任せる（環境変数と台帳の両方を見る）。
+    以前はここで環境変数の1件とだけ突き合わせており、
+    台帳に追加した2人目以降が、正しいパスワードを入れても
+    「メールアドレスまたはパスワードが違います」で弾かれていた。
+    ログイン後の確認は台帳を見ていたため、入口だけが食い違っていた。
+  */
+  if (!(await isAdminEmail(parsed.data.email))) {
     return NextResponse.json(
       { error: "メールアドレスまたはパスワードが違います。" },
       { status: 401 }
