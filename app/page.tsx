@@ -12,6 +12,7 @@ import Reserve from "./components/Reserve";
 import Footer from "./components/Footer";
 import ClientEffects from "./components/ClientEffects";
 import BackToTop from "./components/BackToTop";
+import StructuredData from "./components/StructuredData";
 import { getPublishedCasts } from "./lib/queries/casts";
 import { getPublishedGalleryImages } from "./lib/queries/gallery";
 import { getWeeklyShifts } from "./lib/queries/shifts";
@@ -43,6 +44,8 @@ export default async function Home() {
 
   return (
     <>
+      {/* 店舗情報を機械が読み取れる形で埋め込む。画面には何も出ない */}
+      <StructuredData />
       <Header />
       <Hero />
       <Concept />

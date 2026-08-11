@@ -154,9 +154,64 @@ export const features: Feature[] = [
   },
 ];
 
+/**
+ * サイトの住所（URL）。
+ *
+ * 検索エンジンやSNSに「このページの正式な場所はここです」と伝えるために使う。
+ * 相対的な指定（/blog など）を絶対的な住所へ組み立てる基準にもなる。
+ * 環境変数があればそちらを優先するのは、別の場所で動かしたとき（検証用の複製など）に
+ * 本番の住所を指してしまわないようにするため。
+ */
+export const siteUrl = (
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://vivantkitashinchi.com"
+).replace(/\/$/, "");
+
 // メタ情報（タイトル・説明）。店名・料金から生成し、表記ゆれと料金を単一ソース化する。
 // robots（noindex）の仮公開安全策は layout.tsx 側で管理し、ここでは扱わない。
 export const meta = {
   title: `${shop.nameFull}｜大阪・北新地のガールズバー`,
   description: `大阪・北新地（曽根崎新地）のガールズバー ${shop.nameEn}。北新地の夜に、上質な余韻を。落ち着いた空間で、ゆったりとした大人の時間を。TikTokをご覧の方は初回${prices.tiktokFirst.amount}円。`,
+};
+
+/**
+ * SNSで共有されたときに出す画像に重ねる文言。
+ *
+ * 画像は app/opengraph-image.tsx が店内写真から自動で作る。
+ * 短くしているのは、縮小表示されても読めるようにするため。
+ */
+export const ogImage = {
+  heading: shop.nameEn,
+  sub: "大阪・北新地のガールズバー",
+  catch: "北新地の夜に、上質な余韻を。",
+};
+
+/**
+ * 検索エンジンやAIに店舗の事実を伝えるための素材。
+ *
+ * 人向けの文章とは別に、機械が読み取りやすい形（構造化データ・llms.txt）でも
+ * 同じ内容を出す。両者が食い違うと信頼されないため、ここを唯一の出どころにする。
+ *
+ * openingHours は機械可読の書式。Tu-Su は火曜から日曜、20:00-05:00 は
+ * 20時から翌5時までを表す（日をまたぐ営業もこの書き方で伝わる）。
+ */
+export const seo = {
+  /** 業種。ナイトライフ（BarOrPub）として扱う */
+  businessType: "BarOrPub",
+  /**
+   * 営業時間の機械可読版。上の shop.hours（火〜日 20:00〜翌5:00）と shop.closed（月曜）を
+   * 書き換えたときは、ここも必ず合わせること。Tu-Su は火曜から日曜、
+   * 20:00-05:00 は20時から翌5時まで（日をまたぐ営業もこの書き方で伝わる）。
+   */
+  openingHours: "Tu-Su 20:00-05:00",
+  /** 価格帯。初回料金の一番安い枠と一番高い枠から組み立てる（税込） */
+  priceRange: `¥${prices.tiktokFirst.amount}〜¥${prices.boxFirst.amount}`,
+  areaServed: "大阪市北区・北新地・梅田",
+  /** 検索で使われやすい言い回し。文章に自然に含める目的で持つ */
+  keywords: [
+    "北新地 ガールズバー",
+    "曽根崎新地 ガールズバー",
+    "大阪 北新地 バー",
+    "北新地 飲み屋",
+    shop.nameEn,
+  ],
 };

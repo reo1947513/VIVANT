@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Cinzel, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
-import { meta } from "./data/siteData";
+import { meta, shop, siteUrl } from "./data/siteData";
 
 /*
   書体の配り方について。
@@ -30,21 +30,51 @@ const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
 });
 
-// =====================================================================
-// 【仮公開中：noindex 設定】★本公開時にここを解除する★
-//   キャストがデモ画像（実在しない人物）のため、検索エンジンに本格的に
-//   インデックスさせないよう robots を noindex, nofollow にしています。
-//   実写真へ差し替えて本公開する際は、下の metadata 内の `robots` 行を
-//   削除する（または index:true, follow:true に変更する）だけで解除できます。
-//   解除箇所はこの robots フィールドのみです。
-// =====================================================================
+/**
+ * サイト全体のメタ情報。
+ *
+ * metadataBase を置くと、以下の指定を "/" のような短い書き方にできる。
+ * 検索エンジンやSNSは絶対的な住所を求めるので、Next.js がここを基準に組み立てる。
+ *
+ * 検索エンジンへの掲載について：
+ *   以前は仮公開のため noindex（載せない）にしていたが、公開に踏み切ったため外した。
+ *   再び伏せたくなった場合は、この metadata に
+ *   robots: { index: false, follow: false } を1行足せば元に戻る。
+ *   管理画面は別途 app/k7m2xq9p4vhn/layout.tsx 側で常に伏せてあるため、
+ *   ここを変えても管理画面が検索に出ることはない。
+ *
+ * SNSで共有したときの画像は app/opengraph-image.tsx が自動で作る。
+ * ファイル名が決まった名前になっていると Next.js が拾って
+ * og:image として差し込むため、ここに画像の指定は書かない。
+ *
+ * Search Console の確認コードは環境変数から読む。コードは検索エンジン側が
+ * 発行するもので、コードそのものを書き込んでも害は無いが、
+ * 差し替えのたびにコードを直すのは面倒なので設定値として外に出す。
+ */
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   // タイトル・説明は app/data/siteData.ts に一元管理（店名・料金の表記ゆれ防止）
   title: meta.title,
   description: meta.description,
-  // ↓↓↓ 仮公開中のみ：本公開時に削除 or { index: true, follow: true } に変更して解除 ↓↓↓
-  robots: { index: false, follow: false },
-  // ↑↑↑ noindex, nofollow（仮公開・デモ画像のため）↑↑↑
+  // このページの正式な住所。www 付きなど別の住所で開かれても、こちらが本家だと伝える
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "ja_JP",
+    siteName: shop.nameEn,
+    title: meta.title,
+    description: meta.description,
+    url: "/",
+  },
+  twitter: {
+    // 大きな画像付きの見え方にする（小さな正方形ではなく横長で出る）
+    card: "summary_large_image",
+    title: meta.title,
+    description: meta.description,
+  },
+  verification: {
+    google: process.env.GOOGLE_SITE_VERIFICATION,
+  },
 };
 
 export default function RootLayout({
