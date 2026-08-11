@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -44,6 +44,14 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
 
   // 印を付けた行の id
   const [selected, setSelected] = useState<string[]>([]);
+
+  /*
+    拡大して見ている写真。押した行の情報をそのまま持つ。
+    一覧の写真は小さく、誰の行か見分けにくいため、押したら大きく見られるようにした。
+    閉じ方は3通り用意する（背景を押す・×を押す・Escを押す）。
+    どれか1つしか無いと、環境によっては閉じられなくなるため。
+  */
+  const [viewing, setViewing] = useState<CastRow | null>(null);
 
   // 先読み表示のための控え。サーバーの内容が変わった時点で捨てる
   const [pendingOrder, setPendingOrder] = useState<CastRow[] | null>(null);
@@ -385,14 +393,21 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
                   </td>
                   <td>
                     {cast.photo_url ? (
-                      <Image
-                        className={styles.thumb}
-                        src={cast.photo_url}
-                        alt={cast.name}
-                        width={48}
-                        height={64}
-                        sizes="48px"
-                      />
+                      <button
+                        type="button"
+                        className={styles.thumbButton}
+                        onClick={() => setViewing(cast)}
+                        aria-label={`${cast.name}の写真を大きく見る`}
+                      >
+                        <Image
+                          className={styles.thumb}
+                          src={cast.photo_url}
+                          alt={cast.name}
+                          width={144}
+                          height={192}
+                          sizes="72px"
+                        />
+                      </button>
                     ) : (
                       <div className={styles.thumbEmpty}>NO IMAGE</div>
                     )}
@@ -440,6 +455,77 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
           </tbody>
         </table>
       </div>
+
+      {viewing?.photo_url && (
+        <PhotoViewer
+          name={viewing.name}
+          url={viewing.photo_url}
+          onClose={() => setViewing(null)}
+        />
+      )}
     </>
+  );
+}
+
+/**
+ * 写真の拡大表示。
+ *
+ * 背景・×ボタン・Escのどれでも閉じられるようにしている。
+ * 開いている間は後ろのページが動かないよう、body のスクロールを止める。
+ * 止めないと、拡大表示を指で動かしたときに背後の一覧が動いてしまう。
+ */
+function PhotoViewer({
+  name,
+  url,
+  onClose,
+}: {
+  name: string;
+  url: string;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", onKey);
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className={styles.photoViewer}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${name}の写真`}
+    >
+      <button
+        type="button"
+        className={styles.photoViewerClose}
+        onClick={onClose}
+        aria-label="閉じる"
+      >
+        ×
+      </button>
+      {/* 写真そのものを押しても閉じないようにする（拡大して見ている最中に
+          誤って閉じるのを防ぐ）。閉じるのは背景・×・Esc の3通り。 */}
+      <Image
+        className={styles.photoViewerImg}
+        src={url}
+        alt={name}
+        width={720}
+        height={960}
+        sizes="(max-width: 640px) 92vw, 560px"
+        onClick={(e) => e.stopPropagation()}
+      />
+      <span className={styles.photoViewerName}>{name}</span>
+    </div>
   );
 }

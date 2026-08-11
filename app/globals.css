@@ -28,7 +28,17 @@
 
 /* ===================== ベース ===================== */
 *{ box-sizing:border-box; margin:0; padding:0; }
-html{ scroll-behavior:smooth; }
+html{
+  scroll-behavior:smooth;
+  /* 背景色は html にも置く。
+     スマートフォンで端まで動かしたときに現れる「跳ね返りの余白」は、
+     body ではなく html の色で塗られる。指定が無いと既定の白か黒が出て、
+     サイトの焦茶と食い違って黒い帯のように見えていた。 */
+  background:var(--bg);
+  /* 横方向には動かさない。body だけの指定では、環境によって
+     指で横に払ったときにページごと動いてしまうため、両方に置く。 */
+  overflow-x:hidden;
+}
 body{
   background:var(--bg);
   color:var(--ink);
@@ -37,6 +47,10 @@ body{
   line-height:1.85;
   letter-spacing:.02em;
   overflow-x:hidden;
+  /* 横方向の「行き止まりの先まで引っ張れる」動きを止める。
+     ギャラリーの横送りが端に達したあと、その勢いがページ全体へ伝わって
+     左右に動いてしまうのを防ぐ（縦の引っ張りは残す）。 */
+  overscroll-behavior-x:none;
   -webkit-font-smoothing:antialiased;
 }
 a{ color:inherit; text-decoration:none; }
@@ -233,18 +247,37 @@ ul{ list-style:none; }
 .hamb.open span:nth-child(3){ transform:rotate(-45deg); }
 
 /* モバイルメニュー */
+/* モバイルメニュー：右から左へ滑り込む板
+   以前は上から下りてくる作りだったが、右から出す形に変更した。
+   閉じているときは画面の右外に置いておき、開くと定位置まで滑る。
+
+   visibility を使うのは、閉じている間にキーボード操作で
+   見えない項目へ移動できてしまうのを防ぐため。
+   透明度ではなく位置で見せ消しするので、閉じる動きも最後まで見える
+   （visibility の切り替えだけ、閉じ終わってから行う）。 */
 .mobile-nav{
-  position:fixed; inset:var(--header-h) 0 auto 0;
+  position:fixed;
+  top:var(--header-h);
+  right:0;
+  bottom:0;
+  width:min(78vw, 320px);
   background:rgba(20,15,11,0.97);
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);
-  border-bottom:1px solid var(--hairline);
-  transform:translateY(-12px);
-  opacity:0; pointer-events:none;
-  transition:opacity .35s ease, transform .35s ease;
+  border-left:1px solid var(--hairline);
+  transform:translateX(100%);
+  visibility:hidden;
+  pointer-events:none;
+  transition:transform .35s ease, visibility 0s linear .35s;
   z-index:99;
+  overflow-y:auto;
 }
-.mobile-nav.open{ opacity:1; transform:none; pointer-events:auto; }
+.mobile-nav.open{
+  transform:none;
+  visibility:visible;
+  pointer-events:auto;
+  transition:transform .35s ease, visibility 0s;
+}
 .mobile-nav ul{ padding:18px 28px 28px; }
 .mobile-nav a{
   display:block;
@@ -1058,6 +1091,10 @@ ul{ list-style:none; }
     scroll-snap-type:x mandatory;
     -webkit-overflow-scrolling:touch;
     scrollbar-width:none;
+    /* 端まで送ったあと、その勢いがページ全体へ伝わらないようにする。
+       これが無いと、写真を送り切ったまま指を動かしたときに
+       ページごと左右に動いてしまう。 */
+    overscroll-behavior-x:contain;
     /* 画面の端まで使う。外へ広げる量は .wrap の余白と必ず同じにする
        （決め打ちの数値だと、余白が変わる画面幅でページごと横にはみ出す）。
        端の写真も中央に来られるよう、内側に左右の余白を確保する。 */

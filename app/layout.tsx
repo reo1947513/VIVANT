@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cinzel, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { meta, shop, siteUrl } from "./data/siteData";
@@ -75,6 +75,22 @@ export const metadata: Metadata = {
   verification: {
     google: process.env.GOOGLE_SITE_VERIFICATION,
   },
+};
+
+/**
+ * 表示領域とブラウザの見た目の指定。
+ *
+ * themeColor：スマートフォンのブラウザで、上下に出る操作バーの色になる。
+ *   指定が無いと既定の黒になり、暗い焦茶のサイトに対して黒い帯が乗って見える。
+ *   サイトの背景色（globals.css の --bg）と同じ値にして、境目を無くす。
+ *   値は色そのものを書く必要があるため、CSSの変数と同じ色をここにも置いている。
+ *   背景色を変えるときは両方を直すこと。
+ *
+ * maximumScale と userScalable：既定のまま（拡大できる状態）にしている。
+ *   拡大を禁じると、文字が読みにくい人が読めなくなるため。
+ */
+export const viewport: Viewport = {
+  themeColor: "#140f0b",
 };
 
 export default function RootLayout({

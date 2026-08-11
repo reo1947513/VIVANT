@@ -324,17 +324,77 @@
 .table tr:last-child td {
   border-bottom: none;
 }
+/* 一覧の写真。48×64では誰か見分けがつきにくかったため大きくした。
+   押すと拡大表示が開く（.thumbButton）。 */
 .thumb {
-  width: 48px;
-  height: 64px;
+  width: 72px;
+  height: 96px;
   object-fit: cover;
   border-radius: 4px;
   background: #eceff2;
   display: block;
 }
+/* 写真を押せるようにするための包み。見た目は写真だけに見せる */
+.thumbButton {
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: zoom-in;
+  display: block;
+  border-radius: 4px;
+}
+.thumbButton:hover .thumb {
+  opacity: 0.85;
+}
+
+/* 拡大表示。画面全体を覆い、写真を中央に大きく出す */
+.photoViewer {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(16, 18, 21, 0.86);
+  cursor: zoom-out;
+}
+.photoViewerImg {
+  max-width: min(92vw, 560px);
+  max-height: 88vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 6px;
+  background: #20242a;
+}
+.photoViewerName {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 20px;
+  text-align: center;
+  color: #f3f5f7;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+.photoViewerClose {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
 .thumbEmpty {
-  width: 48px;
-  height: 64px;
+  width: 72px;
+  height: 96px;
   border-radius: 4px;
   background: #eceff2;
   display: grid;

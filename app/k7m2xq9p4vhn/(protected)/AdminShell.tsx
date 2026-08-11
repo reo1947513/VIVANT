@@ -14,16 +14,19 @@ import { ADMIN_LOGIN_PATH, adminPath } from "../../lib/adminPath";
  * ここに直接書かないのは、管理画面の住所を変えるときの直し漏れを防ぐため。
  */
 const NAV = [
-  { href: adminPath("casts"), label: "キャスト", preview: "/#cast" },
-  { href: adminPath("gallery"), label: "ギャラリー", preview: "/#gallery" },
-  { href: adminPath("shifts"), label: "出勤情報", preview: "/#schedule" },
+  { href: adminPath("casts"), label: "キャスト", preview: "/" },
+  { href: adminPath("gallery"), label: "ギャラリー", preview: "/" },
+  { href: adminPath("shifts"), label: "出勤情報", preview: "/" },
   { href: adminPath("posts"), label: "ブログ", preview: "/blog" },
-  { href: adminPath("links"), label: "SNSリンク", preview: "/#reserve" },
+  { href: adminPath("links"), label: "SNSリンク", preview: "/" },
 ] as const;
 
 /**
  * いま開いている管理画面に対応する、公開ページの場所を返す。
- * どれにも当てはまらないときはトップページ。
+ *
+ * 以前は編集中の区画（/#cast など）へ直接飛ばしていたが、
+ * 途中から表示されて全体の印象が掴めないため、トップページの先頭を開くようにした。
+ * ブログだけは別のページなので /blog を開く。
  */
 function previewHref(pathname: string): string {
   return NAV.find((item) => pathname.startsWith(item.href))?.preview ?? "/";
