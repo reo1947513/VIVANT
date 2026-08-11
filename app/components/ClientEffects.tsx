@@ -30,31 +30,19 @@ export default function ClientEffects() {
       window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches
     );
 
-    // ---- 再読み込み時は前回のスクロール位置を復元せず、必ず最上部から表示 ----
-    // ブラウザの自動復元を切る（reload/戻る進むでの位置復元を無効化）。
-    if ("scrollRestoration" in history) {
-      try {
-        history.scrollRestoration = "manual";
-      } catch {
-        /* 一部環境で代入不可でも無視 */
-      }
-    }
-    // リロード、またはハッシュ無しの通常表示では最上部へ即時スクロール。
-    // （#cast 等のハッシュ付き深いリンクでの新規アクセスは、そのセクションへ飛ぶ挙動を尊重する）
-    const navEntry = (
-      typeof performance !== "undefined" && performance.getEntriesByType
-        ? (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined)
-        : undefined
-    );
-    const isReload = navEntry ? navEntry.type === "reload" : false;
-    if (isReload || !window.location.hash) {
-      // scroll-behavior:smooth の影響でアニメ移動にならないよう、一時的に auto にして即時で戻す
-      const htmlEl = document.documentElement;
-      const prevBehavior = htmlEl.style.scrollBehavior;
-      htmlEl.style.scrollBehavior = "auto";
-      window.scrollTo(0, 0);
-      htmlEl.style.scrollBehavior = prevBehavior;
-    }
+    /*
+      最上部から表示することについて。
+
+      以前はここで「ブラウザの位置復元を止める」設定と「先頭へ戻す」処理を
+      行っていたが、どちらもここでは遅すぎた。位置の復元はこのファイルが届くより
+      前に済んでしまうため、一度前回の位置に戻ってから先頭へ跳ぶ動きが見えていた。
+
+      さらに、内容が早く見えるようになったことで、読み始めた利用者が
+      あとから先頭へ引き戻される可能性も出た。
+
+      そこで、位置復元を止める設定は layout.tsx の先頭に置いた短い処理へ移し、
+      ここでの強制移動はやめた。復元自体が起きないので、そもそも先頭から始まる。
+    */
 
     // ---- URL に残ったハッシュを消す ----
     // 表示位置は変えずに、アドレス欄からだけ #cast などを取り除く

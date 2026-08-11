@@ -261,22 +261,35 @@ ul{ list-style:none; }
   right:0;
   bottom:0;
   width:min(78vw, 320px);
-  background:rgba(20,15,11,0.97);
-  backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);
+  /*
+    背景は塗りつぶしにする。以前は半透明＋背景をぼかす処理を掛けていたが、
+    ぼかしは板が動いているあいだ毎コマ計算し直されるため、
+    滑り込む動きが引っかかって見えていた（ヘッダーで直したのと同じ原因）。
+    元々ほぼ不透明だったので、塗りつぶしにしても見た目はほとんど変わらない。
+  */
+  background:#161009;
   border-left:1px solid var(--hairline);
   transform:translateX(100%);
   visibility:hidden;
   pointer-events:none;
-  transition:transform .35s ease, visibility 0s linear .35s;
+  /*
+    動きの曲線は、始まりが軽く終わりが静かに止まる形にする。
+    ease のままだと止まり際が唐突に見える。時間も0.35秒から0.42秒へ伸ばし、
+    指で引き出したような速さに近づける。
+  */
+  transition:transform .42s cubic-bezier(0.22, 0.61, 0.36, 1),
+             visibility 0s linear .42s;
   z-index:99;
   overflow-y:auto;
+  /* 動かす前に専用の描画面を用意させ、滑り出しの一瞬の詰まりを防ぐ */
+  will-change:transform;
 }
 .mobile-nav.open{
   transform:none;
   visibility:visible;
   pointer-events:auto;
-  transition:transform .35s ease, visibility 0s;
+  transition:transform .42s cubic-bezier(0.22, 0.61, 0.36, 1),
+             visibility 0s;
 }
 .mobile-nav ul{ padding:18px 28px 28px; }
 .mobile-nav a{
