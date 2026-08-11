@@ -1,5 +1,5 @@
 import { getAdminSupabase } from "../../../lib/supabase/admin";
-import { businessTodayJst, addDays, formatDateLabel } from "../../../lib/date";
+import { businessTodayJst, addDays, formatDateParts } from "../../../lib/date";
 import ShiftWeekGrid, { type CastRow } from "./ShiftWeekGrid";
 import type { ShiftStatus } from "../../../lib/types";
 import styles from "../../admin.module.css";
@@ -9,6 +9,10 @@ import styles from "../../admin.module.css";
  *
  * Next.js 16 では searchParams が非同期になったため await して受け取る。
  * 「今日」は営業日基準（朝5時境界）で判定する。
+ *
+ * 日付の見出しは「8/7」と「金」に分けて渡す。1行で「8/7(金)」と書くと
+ * 7日分を横に並べたときに1列あたりの幅が要り、狭い画面で収まらないため。
+ * 公開側の出勤表も同じ分け方をしている。
  */
 export const dynamic = "force-dynamic";
 
@@ -24,7 +28,7 @@ export default async function ShiftsPage({
   const weekStart = week && /^\d{4}-\d{2}-\d{2}$/.test(week) ? week : today;
 
   const dates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
-  const dateLabels = dates.map(formatDateLabel);
+  const dateParts = dates.map(formatDateParts);
 
   const supabase = getAdminSupabase();
 
@@ -62,7 +66,7 @@ export default async function ShiftsPage({
       <ShiftWeekGrid
         casts={casts}
         dates={dates}
-        dateLabels={dateLabels}
+        dateParts={dateParts}
         initial={initial}
         weekStart={weekStart}
         prevWeek={addDays(weekStart, -7)}

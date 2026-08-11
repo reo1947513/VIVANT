@@ -72,6 +72,12 @@ export function businessWeekJst(days = 7, now: Date = new Date()): string[] {
 const WEEKDAY_JA = ["日", "月", "火", "水", "木", "金", "土"] as const;
 
 /** "YYYY-MM-DD" を「8/3(日)」の形にする（表示用） */
+/*
+  補足：2026-08-11 時点で、この関数を使っている場所は無い。
+  出勤表は公開側・管理側とも、下の formatDateParts で日付と曜日を分けて出す形に
+  揃えたため（1行だと7日分を横に並べたときに幅が足りず、狭い画面で収まらない）。
+  1行の表記が要る場面のために残してある。
+*/
 export function formatDateLabel(isoDate: string): string {
   const [y, m, d] = isoDate.split("-").map(Number);
   const dow = new Date(Date.UTC(y, m - 1, d, 12)).getUTCDay();

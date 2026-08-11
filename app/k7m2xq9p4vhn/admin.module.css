@@ -602,6 +602,18 @@
   color: #4b5563;
   white-space: nowrap;
 }
+/* 日付の見出しは「8/7」と「金」を上下2段に置く。
+   1行で「8/7(金)」と書くと1列あたりの幅が要り、狭い画面で収まらないため。
+   公開側の出勤表も同じ置き方をしている。 */
+.dateNum {
+  display: block;
+}
+.dateDow {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+}
 .shiftTable th.castCol,
 .shiftTable td.castCol {
   text-align: left;
@@ -824,30 +836,57 @@
   }
 
   /*
-    出勤表。1マスに ○△✕ の3つが入るため、そのままでは7日分で900px必要になり、
-    390pxの画面では2画面半ぶん横に動かすことになる。
-    ボタンと余白を詰めて必要な幅を620px程度まで下げる。
-    キャスト名の列は左に貼り付いたままなので、横に動かしても誰の行か分かる。
+    出勤表。横スクロールを無くす。
+
+    元は1マスに ○△✕ を横一列で置いていたため、1列あたり約106px、
+    7日分で900px必要だった。390pxの画面では2画面半ぶん横に動かすことになる。
+
+    そこで ○△✕ を縦に積む。押し方は変えない（欲しい印を直接押す）まま、
+    1列あたりの幅が3分の1近くまで縮み、7日分が画面内に収まる。
+    そのぶん行は縦に伸びるが、縦のスクロールは元々自然な操作なので負担が小さい。
+
+    幅の配分は table-layout:fixed で決め打ちにする。中身の長さで列が
+    押し広げられると、キャスト名が長い人がいるだけで再びはみ出すため。
+    キャスト名は72pxに収め、入りきらない場合は末尾を…で省略する。
+    残りの幅を7日で等分するので、画面幅が変わっても収まり方は保たれる。
   */
   .shiftTable {
-    min-width: 620px;
+    min-width: 0;
+    width: 100%;
+    table-layout: fixed;
     font-size: 12px;
   }
   .shiftTable th,
   .shiftTable td {
-    padding: 5px 3px;
+    padding: 4px 2px;
   }
   .shiftTable th.castCol,
   .shiftTable td.castCol {
-    padding: 5px 8px;
+    width: 72px;
+    padding: 4px 6px;
     font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
+  /* 見出しは列幅に合わせて折り返せるようにする（2段の指定は基本側にある） */
+  .shiftTable th {
+    white-space: normal;
+    line-height: 1.25;
+  }
+  /* ○△✕ を縦に積む。
+     マスの幅いっぱいに広げ、ボタンはその中で伸縮させる。
+     こうしておくと、360pxのような狭い端末でも列幅なりに縮んで収まる。 */
   .markCell {
-    gap: 1px;
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
   }
   .markBtn {
-    width: 26px;
-    height: 26px;
+    width: 100%;
+    max-width: 34px;
+    height: 24px;
     font-size: 13px;
   }
 }

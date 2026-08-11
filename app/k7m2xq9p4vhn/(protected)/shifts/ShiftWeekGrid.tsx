@@ -28,7 +28,7 @@ const CHOICES: { status: ShiftStatus; mark: string; label: string }[] = [
 export default function ShiftWeekGrid({
   casts,
   dates,
-  dateLabels,
+  dateParts,
   initial,
   weekStart,
   prevWeek,
@@ -37,7 +37,8 @@ export default function ShiftWeekGrid({
 }: {
   casts: CastRow[];
   dates: string[];
-  dateLabels: string[];
+  /** 見出し用。「8/7」と「金」に分けて受け取る（狭い画面で2段に置くため） */
+  dateParts: { date: string; weekday: string }[];
   /** "キャストID|日付" をキーにした初期値 */
   initial: Record<string, ShiftStatus>;
   weekStart: string;
@@ -122,7 +123,11 @@ export default function ShiftWeekGrid({
           ← 前の週
         </button>
         <span className={styles.weekLabel}>
-          {dateLabels[0]} 〜 {dateLabels[dateLabels.length - 1]}
+          {/* 週の範囲はここでだけ「8/7(金)」の形に組み直して出す */}
+          {`${dateParts[0].date}(${dateParts[0].weekday})`} 〜{" "}
+          {`${dateParts[dateParts.length - 1].date}(${
+            dateParts[dateParts.length - 1].weekday
+          })`}
           {isThisWeek && "（今週）"}
         </span>
         <button
@@ -148,8 +153,12 @@ export default function ShiftWeekGrid({
           <thead>
             <tr>
               <th className={styles.castCol}>キャスト</th>
-              {dateLabels.map((label, i) => (
-                <th key={dates[i]}>{label}</th>
+              {dateParts.map((part, i) => (
+                <th key={dates[i]}>
+                  {/* 日付と曜日を上下2段に置く。1列あたりの幅が半分近くまで縮む */}
+                  <span className={styles.dateNum}>{part.date}</span>
+                  <span className={styles.dateDow}>{part.weekday}</span>
+                </th>
               ))}
             </tr>
           </thead>
