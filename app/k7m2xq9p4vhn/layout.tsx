@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 /**
  * 管理画面の共通レイアウト。
@@ -12,6 +12,17 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "管理画面 | BAR VIVANT",
   robots: { index: false, follow: false },
+};
+
+/**
+ * ブラウザの操作バーの色を、管理画面の地の色に合わせる。
+ *
+ * サイト全体では公開ページ向けの焦茶を指定しているが、管理画面は白基調なので、
+ * そのままだと上下に暗い帯が乗って見える。
+ * ここで指定すると、この配下のページ（ログイン画面を含む）だけ上書きされる。
+ */
+export const viewport: Viewport = {
+  themeColor: "#f6f7f9",
 };
 
 export default function AdminLayout({

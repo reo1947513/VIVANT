@@ -17,7 +17,7 @@ export default async function LoginPage() {
   if (await getAdminUser()) redirect(ADMIN_HOME_PATH);
 
   return (
-    <div className={styles.shell}>
+    <div className={`admin-root ${styles.shell}`}>
       <div className={styles.loginWrap}>
         <div className={styles.loginCard}>
           <h1 className={styles.loginTitle}>BAR VIVANT 管理画面</h1>

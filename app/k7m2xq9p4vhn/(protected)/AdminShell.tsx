@@ -49,7 +49,10 @@ export default function AdminShell({
   }
 
   return (
-    <div className={styles.shell}>
+    /* admin-root は、地の色を明るくするための目印（globals.css で使う）。
+       管理画面は白基調なので、公開ページ向けの焦茶のままだと
+       端まで動かしたときに上下へ暗い帯が出る。 */
+    <div className={`admin-root ${styles.shell}`}>
       <header className={styles.header}>
         <div className={styles.brand}>
           BAR VIVANT

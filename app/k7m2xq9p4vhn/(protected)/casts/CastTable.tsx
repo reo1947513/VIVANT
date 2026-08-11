@@ -405,7 +405,8 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
                           alt={cast.name}
                           width={144}
                           height={192}
-                          sizes="72px"
+                          /* 表示の大きさは画面幅で変わる（狭い画面では96px） */
+                          sizes="(max-width: 640px) 96px, 72px"
                         />
                       </button>
                     ) : (

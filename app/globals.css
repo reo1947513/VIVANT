@@ -53,6 +53,21 @@ body{
   overscroll-behavior-x:none;
   -webkit-font-smoothing:antialiased;
 }
+/* 管理画面だけは地の色を明るくする。
+
+   管理画面は白基調で、公開ページの焦茶とは配色が逆になる。
+   地の色（html と body）は公開ページ向けの焦茶にしてあるため、
+   そのままだと管理画面で端まで動かしたときに上下へ暗い帯が出る。
+
+   .admin-root は管理画面の一番外側に付けている目印で、
+   :has() は「その目印を含んでいるページなら」という意味。
+   管理画面側にだけ効かせるために使っている。
+   ブラウザの操作バーの色は、管理画面のレイアウト側で別に指定している。 */
+html:has(.admin-root),
+html:has(.admin-root) body{
+  background:#f6f7f9;
+}
+
 a{ color:inherit; text-decoration:none; }
 img{ display:block; max-width:100%; }
 ul{ list-style:none; }
