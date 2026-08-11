@@ -31,7 +31,7 @@ import { ADMIN_LOGIN_PATH } from "./adminPath";
  * 人目に触れさせないための目隠しで、守りの本体はここの確認とデータベース側にある。
  */
 
-export type AdminUser = { id: string; email: string };
+type AdminUser = { id: string; email: string };
 
 /**
  * そのメールアドレスが管理者として許されているかを返す。

@@ -15,7 +15,7 @@ import { shop } from "../../data/siteData";
  * 予備として使う。以前からLPの各所に出ているボタンが、
  * 通信の失敗で急に消えることを避けるため。
  */
-export type SiteLink = {
+type SiteLink = {
   platform: string;
   label: string;
   url: string;
@@ -61,8 +61,3 @@ export async function getSiteLinks(): Promise<SiteLink[]> {
   return cachedLinks();
 }
 
-/** 1件だけ欲しいとき。未登録なら空文字を返す */
-export async function getLinkUrl(platform: string): Promise<string> {
-  const links = await getSiteLinks();
-  return links.find((l) => l.platform === platform)?.url ?? "";
-}

@@ -15,7 +15,7 @@ import { getAdminSupabase } from "./supabase/admin";
  */
 
 /** 保存先。用途ごとに分けておくと、容量も削除も権限も別々に扱える */
-export type Bucket = "cast-photos" | "gallery" | "blog";
+type Bucket = "cast-photos" | "gallery" | "blog";
 
 /** 受け付ける形式と、それに対応する拡張子 */
 const EXT_BY_TYPE: Record<string, string> = {
@@ -24,9 +24,9 @@ const EXT_BY_TYPE: Record<string, string> = {
   "image/webp": "webp",
 };
 
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024; // 5MB
 
-export type UploadResult = { url: string; path: string };
+type UploadResult = { url: string; path: string };
 
 /** アップロードできない理由を利用者に見せる用のエラー */
 export class UploadError extends Error {}

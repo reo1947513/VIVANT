@@ -35,14 +35,6 @@ export type GalleryImage = {
  */
 export type ShiftStatus = "work" | "undecided" | "off";
 
-/** 出勤1件（1キャストの1日分） */
-export type Shift = {
-  castId: string;
-  castName: string;
-  workDate: string; // "YYYY-MM-DD"（日本時間の暦日。時差の影響を受けない文字列で持つ）
-  status: ShiftStatus;
-};
-
 /** ブログ記事 */
 export type Post = {
   id: string;

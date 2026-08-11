@@ -143,11 +143,14 @@ export default function CastForm({ initial }: { initial: CastFormValues }) {
         </span>
       </label>
 
+      {/* 写真が無いときの枠にも、写真があるときと同じ大きさの指定を当てる。
+          以前はここだけ大きさを直接書いていたため、狭い画面での大きさの指定（CSS側）が
+          効かず、写真の有無で枠の大きさが変わっていた。 */}
       <div className={styles.photoRow}>
         {photoUrl ? (
           <img className={styles.photoPreview} src={photoUrl} alt="現在の写真" />
         ) : (
-          <div className={styles.thumbEmpty} style={{ width: 96, height: 128 }}>
+          <div className={`${styles.thumbEmpty} ${styles.photoPreview}`}>
             NO IMAGE
           </div>
         )}
