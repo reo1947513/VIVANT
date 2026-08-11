@@ -3,13 +3,26 @@
 import { useEffect } from "react";
 
 /*
-  カルーセル以外の Desktop 版グローバル挙動をマウント後に id/class 経由で配線する。
+  カルーセル以外のグローバル挙動を、画面が組み上がったあとに id/class 経由で配線する。
   ・ヘッダー：スクロール40px超で背景クラス付与
   ・ハンバーガー：×変形・メニュー開閉・項目クリックで閉じる
-  ・ヒーロー：読み込み時の時間差フェードアップ（reduced motion では即時表示）
-  ・reveal：IntersectionObserver で下からフェードイン（reduced motion では即時表示）
   ・区画リンク：自前でスクロールし、URL に #cast などを残さない
-  reveal/ヒーローの reduced motion 抑制は Desktop 版と同じ（カルーセルだけ例外で動く）。
+  ・再読み込み時のスクロール位置
+
+  ここで扱わないもの（意図的に外してある）：
+    ・ヒーローの時間差フェードアップ
+        CSSのアニメーションに移した（globals.css の .hero-anim）。
+        以前はここで window の load を待って .loaded を付けていたが、
+        load はページ内の画像を全て取り終えてから起きるため、
+        最初の画面がギャラリー写真の到着まで待たされていた。
+    ・スクロールで現れる部分（.reveal）の判定
+        layout.tsx の先頭に置いた短い処理へ移した。
+        本体のこのファイルは通信で取りに行くぶんHTMLより遅れて届くため、
+        ここで判定していると、その差だけ画面が透明のままになっていた。
+
+  どちらも「利用者の操作と無関係で、表示された時点で始めてよい演出」なので、
+  本体の到着を待つ必要が無い。ここに残しているのは、押す・スクロールするなど
+  操作に反応するものだけ。
 */
 export default function ClientEffects() {
   useEffect(() => {
@@ -126,47 +139,13 @@ export default function ClientEffects() {
     const navLinks = mobileNav ? Array.from(mobileNav.querySelectorAll("a")) : [];
     navLinks.forEach((a) => a.addEventListener("click", closeMenu));
 
-    // ---- ヒーロー：読み込み時に時間差フェードアップ ----
-    const hero = document.getElementById("top");
-    const addLoaded = () => hero?.classList.add("loaded");
-    const onWinLoad = () => requestAnimationFrame(addLoaded);
-    if (reduceMotion) {
-      addLoaded();
-    } else if (document.readyState === "complete") {
-      addLoaded();
-    } else {
-      window.addEventListener("load", onWinLoad);
-    }
-
-    // ---- スクロールで下からフェードイン ----
-    const revealEls = Array.from(document.querySelectorAll<HTMLElement>(".reveal"));
-    let io: IntersectionObserver | null = null;
-    if (reduceMotion || !("IntersectionObserver" in window)) {
-      revealEls.forEach((el) => el.classList.add("is-visible"));
-    } else {
-      io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((e) => {
-            if (e.isIntersecting) {
-              e.target.classList.add("is-visible");
-              io?.unobserve(e.target);
-            }
-          });
-        },
-        { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
-      );
-      revealEls.forEach((el) => io!.observe(el));
-    }
-
     return () => {
       cancelAnimationFrame(stripHashRaf);
       window.removeEventListener("load", onLoadStripHash);
       document.removeEventListener("click", onDocClick);
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("load", onWinLoad);
       hamb?.removeEventListener("click", onHamb);
       navLinks.forEach((a) => a.removeEventListener("click", closeMenu));
-      io?.disconnect();
     };
   }, []);
 

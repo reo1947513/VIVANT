@@ -54,13 +54,26 @@ ul{ list-style:none; }
   padding:0 var(--wrap-pad);
 }
 
-/* スクロールで現れる共通要素 */
+/* スクロールで現れる共通要素
+
+   隠すのは html に js が付いているときだけにする。
+   js を付けるのは、ページの先頭に置いた短い処理（layout.tsx の中）で、
+   これは本体の JavaScript より先に、HTMLを読みながら実行される。
+
+   なぜこうするのか：
+     以前は無条件に透明（opacity:0）にしており、見えるように戻すのは
+     本体の JavaScript が届いてからだった。そのため回線が細いと、
+     文字も写真も無い状態がしばらく続いていた。
+     JavaScript が動かない環境では、永久に何も見えないままでもあった。
+     この書き方なら、js が付かない＝演出できない環境では最初から見えている。 */
 .reveal{
-  opacity:0;
-  transform:translateY(34px);
   transition:opacity 1s ease, transform 1s ease;
 }
-.reveal.is-visible{ opacity:1; transform:none; }
+:root.js .reveal{
+  opacity:0;
+  transform:translateY(34px);
+}
+:root.js .reveal.is-visible{ opacity:1; transform:none; }
 
 /* フォーカス可視化 */
 :focus-visible{
@@ -422,17 +435,31 @@ ul{ list-style:none; }
 }
 
 
-/* ヒーロー読み込みフェードアップ（時間差） */
-.hero-anim{ opacity:0; transform:translateY(28px); }
-.hero.loaded .hero-anim{
-  opacity:1; transform:none;
-  transition:opacity 1s ease, transform 1s ease;
+/* ヒーロー読み込みフェードアップ（時間差）
+
+   以前は JavaScript が「読み込み完了（window の load）」を受けて .loaded を
+   付けるまで、この部分は透明のままだった。load はページ内の画像を全て取り終えて
+   から起きるため、最初の画面がギャラリー写真の到着まで待たされていた。
+
+   ここは「表示されたら順に浮かび上がる」だけの演出で、スクロール位置も
+   利用者の操作も関係しない。CSSのアニメーションで書けば、その要素が
+   描かれた時点で始まり、JavaScript の到着も画像の完了も待たなくなる。
+
+   forwards は、終わったあとも最後の状態（見えている状態）を保つ指定。
+   動きを減らす設定では、下のほうで animation ごと無効化している。 */
+.hero-anim{
+  opacity:0;
+  transform:translateY(28px);
+  animation:heroIn 1s ease forwards;
 }
-.hero.loaded .d1{ transition-delay:.1s; }
-.hero.loaded .d2{ transition-delay:.3s; }
-.hero.loaded .d3{ transition-delay:.5s; }
-.hero.loaded .d4{ transition-delay:.7s; }
-.hero.loaded .d5{ transition-delay:.9s; }
+.hero .d1{ animation-delay:.1s; }
+.hero .d2{ animation-delay:.3s; }
+.hero .d3{ animation-delay:.5s; }
+.hero .d4{ animation-delay:.7s; }
+.hero .d5{ animation-delay:.9s; }
+@keyframes heroIn{
+  to{ opacity:1; transform:none; }
+}
 
 /* ===================== CONCEPT ===================== */
 .concept{ text-align:center; position:relative; overflow:hidden; }

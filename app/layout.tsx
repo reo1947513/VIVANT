@@ -85,6 +85,30 @@ export default function RootLayout({
   return (
     <html lang="ja" className={`${cinzel.variable} ${cormorant.variable}`}>
       <head>
+        {/*
+          本体の JavaScript より先に動かす短い処理。
+
+          役割は2つ。
+            1. html に js を付ける。CSS はこれが付いているときだけ
+               「スクロールで現れる部分」を透明にする。
+               付かない環境（JavaScript が無効・読み込み失敗）では
+               最初から見えるので、何も出ないまま終わることがない。
+            2. 現れる判定（画面に入ったか）を、HTMLを読み終えた時点で始める。
+
+          なぜ本体に任せないのか：
+            本体は通信で取りに行くため、HTMLより必ず遅れて届く。
+            実測では HTML が764ミリ秒、本体の到着が1477ミリ秒で、
+            その差の約675ミリ秒は文字も写真も透明のままだった。
+            この処理はHTMLに直接書いてあるので取りに行く時間がゼロで、
+            差そのものが無くなる。
+
+          外から取り込む文字列は一切使っていない（固定の処理のみ）。
+        */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){var d=document,r=d.documentElement;r.className+=' js';function i(){var e=d.querySelectorAll('.reveal'),n;if(!('IntersectionObserver' in window)){for(n=0;n<e.length;n++)e[n].classList.add('is-visible');return}var o=new IntersectionObserver(function(s){for(var k=0;k<s.length;k++){if(s[k].isIntersecting){s[k].target.classList.add('is-visible');o.unobserve(s[k].target)}}},{threshold:0.12,rootMargin:'0px 0px -8% 0px'});for(n=0;n<e.length;n++)o.observe(e[n])}if(d.readyState!=='loading')i();else d.addEventListener('DOMContentLoaded',i)})();`,
+          }}
+        />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"

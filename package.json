@@ -13,7 +13,8 @@
     "clean:test": "node scripts/clean-test-shifts.mjs",
     "add:admin": "node scripts/add-admin.mjs",
     "list:admins": "node scripts/list-admins.mjs",
-    "img:webp": "node scripts/convert-webp.mjs"
+    "img:webp": "node scripts/convert-webp.mjs",
+    "make:icon": "node scripts/make-icon.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
