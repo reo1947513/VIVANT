@@ -73,6 +73,12 @@ export default function CastCarousel({ cast }: { cast: Cast[] }) {
     );
     const loopable = n >= 2;
     let index = loopable ? c : 0; // 最初の実カードの位置
+
+    /* 専用の描画面を確保する指定（CSS の will-change）は、実際に動くときだけ付ける。
+       付けたままにするとブラウザが面を確保し続け、動かないのにメモリを占有する。
+       キャストが1名以下だと自動送りもスワイプも働かない（loopable が偽）ため、
+       その場合は付けない。後片付けで必ず外す。 */
+    if (loopable) track.classList.add("is-looping");
     const slideDur = reduceMotion ? 0.3 : 0.9; // 秒：通常は0.9sでより滑らかに（reduced motion は0.3s据え置き）
     const interval = reduceMotion ? 6000 : 4000; // ms：移動を伸ばしたぶん間隔も4sに（reduced motion は6s据え置き）
     const EASE = "cubic-bezier(0.22, 0.61, 0.36, 1)"; // 開始・終了が柔らかい ease-out 寄りの曲線
@@ -376,6 +382,7 @@ export default function CastCarousel({ cast }: { cast: Cast[] }) {
       stop();
       clearResume();
       clearSnap();
+      track.classList.remove("is-looping");
       if (rt !== undefined) clearTimeout(rt);
       track.removeEventListener("transitionend", onTransitionEnd as EventListener);
       carousel.removeEventListener("mouseenter", onEnter);

@@ -1,6 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ClientEffects from "../components/ClientEffects";
@@ -18,6 +18,8 @@ import { shop } from "../data/siteData";
  *
  * Header と Footer に variant="page" を渡すのは、区画へのリンクを "/#concept" の形にして
  * トップページへ戻すため。このページには同じ区画が無いので、そのままでは押しても動かない。
+ *
+ * カバー画像は Next.js の画像機能を通す。原寸のまま配ると1枚で数MBになりうるため。
  */
 export const revalidate = 300;
 
@@ -50,7 +52,17 @@ export default async function BlogIndexPage() {
                   <div
                     className={post.coverUrl ? "blog-cover" : "blog-cover blog-cover--empty"}
                   >
-                    {post.coverUrl && <img src={post.coverUrl} alt="" loading="lazy" />}
+                    {post.coverUrl && (
+                      <Image
+                        src={post.coverUrl}
+                        alt=""
+                        width={1100}
+                        height={619}
+                        /* パソコンでは2列で1枚およそ550px、860px以下では1列で画面幅の9割強 */
+                        sizes="(max-width: 860px) 92vw, 550px"
+                        quality={60}
+                      />
+                    )}
                   </div>
                   <div className="blog-body">
                     {post.publishedAt && (

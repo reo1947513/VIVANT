@@ -1,6 +1,6 @@
-/* eslint-disable @next/next/no-img-element */
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
@@ -22,6 +22,9 @@ import { shop } from "../../data/siteData";
  * 本文は白紙の状態から書かれたプレーンテキストとして表示する。
  * HTML として画面に流し込む書き方（dangerouslySetInnerHTML）は使わない。
  * 使うと、本文に紛れ込んだタグがそのまま動いてしまう。
+ *
+ * カバー画像は Next.js の画像機能を通す。原寸のまま配ると1枚で数MBになりうるため。
+ * この写真は開いた画面の上部に出るので、後回しにせず先に読み込ませる（priority）。
  */
 export const revalidate = 300;
 export const dynamicParams = true;
@@ -73,7 +76,16 @@ export default async function PostPage({
             </div>
 
             {post.coverUrl && (
-              <img className="article-cover" src={post.coverUrl} alt="" />
+              <Image
+                className="article-cover"
+                src={post.coverUrl}
+                alt=""
+                width={1520}
+                height={855}
+                /* 記事の本文幅は最大760px。860px以下では画面幅の9割強まで広がる */
+                sizes="(max-width: 860px) 92vw, 760px"
+                priority
+              />
             )}
 
             <div className="article-body">{post.body}</div>

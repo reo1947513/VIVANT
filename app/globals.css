@@ -115,7 +115,11 @@ ul{ list-style:none; }
   height:var(--header-h);
   z-index:100;
   display:flex; align-items:center;
-  transition:background .4s ease, backdrop-filter .4s ease, border-color .4s ease;
+  /* すりガラス（backdrop-filter）は変化の対象に入れない。
+     ぼかしは変化させるあいだ毎フレーム背景をぼかし直すため、
+     スクロールを始めた瞬間と処理が重なって引っかかりやすい。
+     色と境界線だけを0.4秒でつなげば、切り替わりは十分なめらかに見える。 */
+  transition:background .4s ease, border-color .4s ease;
   border-bottom:1px solid transparent;
 }
 .header.scrolled{
@@ -514,6 +518,13 @@ ul{ list-style:none; }
   z-index:1;
   display:flex;
   transition:transform .9s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+/* 専用の描画面を確保するのは、実際に動く場合だけにする。
+   will-change はブラウザに面を確保させ続ける指定で、
+   動かないのに付けたままだとメモリを占有するだけになる。
+   キャストが2名以上のときだけ自動送りが働くため、
+   その条件を満たす場合に CastCarousel 側からこのクラスを付ける。 */
+.cast-track.is-looping{
   will-change:transform;
 }
 .cast-slot{
