@@ -745,3 +745,123 @@
     display: inline-flex;
   }
 }
+
+/* =====================================================================
+   スマートフォン向けの調整
+
+   これまでこのファイルには画面幅に応じた指定が2か所しか無く、
+   横並びの部分が幅の足りない画面ではみ出していた。
+   下では「横に並べていたものを縦に積む」「余白と文字を詰める」の2点を行う。
+
+   考え方：
+     ・押す・入力するものは、幅いっぱいに広げて押しやすくする。
+     ・表は列を消さない。消すと編集に必要な情報が見えなくなるため、
+       横スクロールを残したまま、必要な幅そのものを小さくする。
+   ===================================================================== */
+@media (max-width: 640px) {
+  /* 画面まわりの余白を詰めて、中身に使える幅を広げる */
+  .main {
+    padding: 20px 14px 60px;
+  }
+  .header {
+    padding: 0 14px;
+  }
+  .nav {
+    padding: 0 14px;
+  }
+  .card {
+    padding: 16px 14px;
+  }
+
+  /* 頭の操作列。入りきらないときは折り返す */
+  .headerRight {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  /* 見出しと「新規追加」。横に並べると題名が潰れるので縦に積む */
+  .pageHead {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .pageTitle {
+    font-size: 20px;
+  }
+  /* ボタンは幅いっぱいにせず、左に寄せて置く（誤って押しにくくする） */
+  .pageHead .btnLink {
+    align-self: flex-start;
+  }
+
+  /* 保存とキャンセル。横に並べると画面からはみ出す */
+  .formActions {
+    flex-wrap: wrap;
+  }
+  .formActions .btnPrimary,
+  .formActions .btnSecondary {
+    flex: 1 1 140px;
+  }
+
+  /* 保存ボタンと「保存しました」の文言 */
+  .saveBar {
+    flex-wrap: wrap;
+  }
+
+  /* 写真の見本と選択欄。横並びだと選択欄が細くなりすぎる */
+  .photoRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* 一覧の表。列は消さず、余白と文字を詰めて必要な幅を減らす */
+  .table {
+    font-size: 13px;
+  }
+  .table th,
+  .table td {
+    padding: 10px 8px;
+  }
+
+  /*
+    出勤表。1マスに ○△✕ の3つが入るため、そのままでは7日分で900px必要になり、
+    390pxの画面では2画面半ぶん横に動かすことになる。
+    ボタンと余白を詰めて必要な幅を620px程度まで下げる。
+    キャスト名の列は左に貼り付いたままなので、横に動かしても誰の行か分かる。
+  */
+  .shiftTable {
+    min-width: 620px;
+    font-size: 12px;
+  }
+  .shiftTable th,
+  .shiftTable td {
+    padding: 5px 3px;
+  }
+  .shiftTable th.castCol,
+  .shiftTable td.castCol {
+    padding: 5px 8px;
+    font-size: 12px;
+  }
+  .markCell {
+    gap: 1px;
+  }
+  .markBtn {
+    width: 26px;
+    height: 26px;
+    font-size: 13px;
+  }
+}
+
+/*
+  指で操作する環境では、押す部分の高さを確保する。
+  幅の狭い画面かどうかとは別の条件なので、独立した指定にしている
+  （タブレットのように幅は広いが指で触る場合にも効かせるため）。
+*/
+@media (pointer: coarse) {
+  .btnPrimary,
+  .btnSecondary,
+  .btnDanger,
+  .btnLink {
+    min-height: 40px;
+  }
+}
