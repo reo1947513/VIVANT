@@ -8,10 +8,29 @@ import type { Metadata, Viewport } from "next";
  *
  * 検索避けはここで独立して指定する。トップページ側の検索避けは本公開時に外す予定なので、
  * それに巻き込まれて管理画面が検索結果に出ないようにするため。
+ *
+ * openGraph.images を空にしているのは、店の顔であるOGP画像をここで打ち切るため。
+ * ルート（app/layout.tsx）は openGraph.images を明示していないので、そのままだと
+ * app/opengraph-image.tsx が自動生成した画像が管理画面のリンクにもそのまま
+ * 付いてきてしまう。images: [] を明示すると、その自動生成分だけ止まる。
+ *
+ * description を空文字にしているのは、店の説明文（料金や住所を含む案内文）を
+ * 完全に断ち切るため。Next.js は openGraph に説明文が無いとき、このページの
+ * 説明文（description）で自動的に埋める仕様になっており、ここを空にしないと
+ * ルートの店舗説明文がそのまま og:description に漏れてしまう。
+ *
+ * og:title だけは「管理画面 | BAR VIVANT」のまま残る。これは <title> と同じ文言で、
+ * ブラウザのタブに常に出ているものと同一であり、Next.js の仕様上、ページに
+ * タイトルがある限り og:title を完全に空にはできない（omitできるのは画像だけ）。
+ * 店の情報を明かすものではないため実害は無いと判断し、そのままにしている。
  */
 export const metadata: Metadata = {
   title: "管理画面 | BAR VIVANT",
+  description: "",
   robots: { index: false, follow: false },
+  openGraph: {
+    images: [],
+  },
 };
 
 /**
