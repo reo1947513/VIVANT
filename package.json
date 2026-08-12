@@ -16,7 +16,8 @@
     "img:webp": "node scripts/convert-webp.mjs",
     "make:icon": "node scripts/make-icon.mjs",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepare": "husky"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
@@ -32,6 +33,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "husky": "^9.1.7",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.10"
