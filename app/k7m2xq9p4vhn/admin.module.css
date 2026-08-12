@@ -897,12 +897,91 @@
 
   /* 写真は逆に大きくする。
      小さい画面ほど、誰の行かを写真で見分けたい場面が多い。
-     幅が要るぶんは、上で詰めた余白と文字で相殺している。
      さらに大きく見たいときは、写真を押すと拡大表示が開く。 */
   .thumb,
   .thumbEmpty {
     width: 96px;
     height: 128px;
+  }
+
+  /*
+    キャスト一覧は、狭い画面では表をやめて1人1枚のカードとして縦に積む。
+
+    なぜやめるか：
+      この一覧は7つの列（選択・順番・写真・源氏名・一言・公開・操作）を横に並べる。
+      390pxの画面に収めようとすると1列あたり50px程度しか取れず、
+      「編集」が「編／集」、「公開中」が「公開／中」のように
+      文字単位で折り返されて読めなくなっていた。写真を大きくしたことで
+      さらに幅が足りなくなり、操作ボタンが画面の端に貼り付いていた。
+
+    どう置くか：
+      左端に選択の四角、その右に写真、さらに右へ源氏名・一言・公開状態を縦に積み、
+      最下段に並び替えの矢印と操作ボタンを置く。
+      横スクロールも文字の割れも無くなり、写真は大きいまま保てる。
+
+    この指定はキャスト一覧（castTable）だけに効かせる。
+    ブログの一覧も同じ .table を使っており、そちらは列の構成が違うため。
+    パソコンの幅では従来どおりの表のまま。
+  */
+  .castTable,
+  .castTable tbody {
+    display: block;
+  }
+  .castTable thead {
+    display: none;
+  }
+  .castTable tr {
+    display: grid;
+    grid-template-columns: auto 96px 1fr;
+    grid-template-areas:
+      "check photo name"
+      "check photo word"
+      "check photo status"
+      "order order actions";
+    gap: 6px 10px;
+    align-items: center;
+    padding: 12px 10px;
+    border-bottom: 1px solid #eef1f4;
+  }
+  .castTable td {
+    display: block;
+    padding: 0;
+    border: none;
+  }
+  .castTable td.checkCol {
+    grid-area: check;
+    align-self: start;
+    width: auto;
+  }
+  .castTable td.cellPhoto {
+    grid-area: photo;
+  }
+  .castTable td.cellName {
+    grid-area: name;
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .castTable td.cellWord {
+    grid-area: word;
+    color: #6b7280;
+    font-size: 12px;
+  }
+  .castTable td.cellStatus {
+    grid-area: status;
+    justify-self: start;
+  }
+  .castTable td.cellOrder {
+    grid-area: order;
+  }
+  .castTable td.cellActions {
+    grid-area: actions;
+    justify-self: end;
+  }
+  /* 並び替えの矢印は、つかんで動かせない環境向けの手段。
+     カードの最下段では番号とつかむ印は不要なので、矢印だけを残す */
+  .castTable .orderNumber,
+  .castTable .dragHandle {
+    display: none;
   }
   /* 編集画面の写真も、確認しやすい大きさにする */
   .photoPreview {

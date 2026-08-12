@@ -305,7 +305,7 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
       )}
 
       <div className={styles.tableWrap}>
-        <table className={styles.table}>
+        <table className={`${styles.table} ${styles.castTable}`}>
           <thead>
             <tr>
               <th className={styles.checkCol}>
@@ -362,7 +362,7 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
                       aria-label={`${cast.name}を選択`}
                     />
                   </td>
-                  <td>
+                  <td className={styles.cellOrder}>
                     <div className={styles.orderCell}>
                       <span className={styles.dragHandle} title="つかんで上下に動かす">
                         ⠿
@@ -391,7 +391,7 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
                       </span>
                     </div>
                   </td>
-                  <td>
+                  <td className={styles.cellPhoto}>
                     {cast.photo_url ? (
                       <button
                         type="button"
@@ -413,9 +413,9 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
                       <div className={styles.thumbEmpty}>NO IMAGE</div>
                     )}
                   </td>
-                  <td>{cast.name}</td>
-                  <td>{cast.word || "—"}</td>
-                  <td>
+                  <td className={styles.cellName}>{cast.name}</td>
+                  <td className={styles.cellWord}>{cast.word || "—"}</td>
+                  <td className={styles.cellStatus}>
                     <button
                       className={styles.iconBtn}
                       type="button"
@@ -431,7 +431,7 @@ export default function CastTable({ casts }: { casts: CastRow[] }) {
                       </span>
                     </button>
                   </td>
-                  <td>
+                  <td className={styles.cellActions}>
                     <div className={styles.rowActions}>
                       <Link
                         className={styles.iconBtn}
