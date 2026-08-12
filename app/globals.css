@@ -1084,7 +1084,13 @@ ul{ list-style:none; }
     background-position:72% 78%;
   }
   .hero .wrap{ grid-template-columns:1fr; gap:40px; }
-  .hero-photo{ order:-1; aspect-ratio:4/3; }   /* モバイルも同じ横長比率で左右を切らない */
+  /* 縦積みでは写真を文章より先に見せる。
+     並び順の指定は、並びを作っている箱（.hero .wrap）の直接の子にしか効かない。
+     写真は .hero-right に包まれているため、指定はそちらに置く。
+     以前は .hero-photo に書いてあり、包まれている側だったので効いておらず、
+     写真が文章の下に出ていた。 */
+  .hero-right{ order:-1; }
+  .hero-photo{ aspect-ratio:4/3; }   /* モバイルも同じ横長比率で左右を切らない */
   /* 縦積みでは文章が写真の左ではなく下に来るため、左端だけを濃く沈める理由が無い。
      左右を均等にし、上下の陰をわずかに強めて写真の輪郭を目立たせない。 */
   .hero-photo::before{
