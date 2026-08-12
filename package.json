@@ -14,7 +14,9 @@
     "add:admin": "node scripts/add-admin.mjs",
     "list:admins": "node scripts/list-admins.mjs",
     "img:webp": "node scripts/convert-webp.mjs",
-    "make:icon": "node scripts/make-icon.mjs"
+    "make:icon": "node scripts/make-icon.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
@@ -31,6 +33,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }
