@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../../admin.module.css";
 import { adminPath } from "../../../lib/adminPath";
+import { shrinkImage, uploadErrorMessage } from "../../../lib/clientImage";
 
 /**
  * キャストの追加・編集フォーム。
@@ -36,15 +37,16 @@ export default function CastForm({ initial }: { initial: CastFormValues }) {
 
   async function uploadPhoto(castId: string): Promise<boolean> {
     if (!file) return true;
+    // 送れる量に上限があるため、大きな写真は送る前に縮める（app/lib/clientImage.ts）
     const form = new FormData();
-    form.append("photo", file);
+    form.append("photo", await shrinkImage(file));
     const res = await fetch(`/api/admin/casts/${castId}/photo`, {
       method: "POST",
       body: form,
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "写真を保存できませんでした。");
+      setError(uploadErrorMessage(res.status, data, "写真を保存できませんでした。"));
       return false;
     }
     return true;
@@ -162,7 +164,7 @@ export default function CastForm({ initial }: { initial: CastFormValues }) {
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />
           <span className={styles.hint}>
-            JPEG・PNG・WebP、5MBまで。縦長（縦3：横4程度）の写真が最もきれいに表示されます。
+            JPEG・PNG・WebP。大きな写真は送る前に自動で縮めます。縦長（縦3：横4程度）の写真が最もきれいに表示されます。
             選んだあと保存すると差し替わります。
           </span>
           {isEdit && photoUrl && (
