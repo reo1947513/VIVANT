@@ -4,6 +4,10 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import styles from "../../admin.module.css";
+import { shrinkImage, uploadErrorMessage } from "../../../lib/clientImage";
+
+/** 一度に選べる枚数の上限 */
+const MAX_FILES = 20;
 
 /**
  * ギャラリー管理。追加・並び替え・公開切替・削除を1画面で行う。
@@ -38,6 +42,8 @@ export default function GalleryManager({ images }: { images: GalleryRow[] }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  // 写真の追加中に「何枚目を送っているか」を出す
+  const [progress, setProgress] = useState("");
 
   // 印を付けた写真の id
   const [selected, setSelected] = useState<string[]>([]);
@@ -112,33 +118,79 @@ export default function GalleryManager({ images }: { images: GalleryRow[] }) {
     }
   }
 
+  /**
+   * 写真の追加。
+   *
+   * 1枚ずつ縮めてから、1枚ずつ送る。以前は選んだ写真をすべて1回の送信にまとめていたが、
+   * 本番の置き場所（Vercel）は1回に約4.5MBまでしか受け取れず、
+   * スマートフォンの写真を2〜3枚選ぶだけで門前払いされていた。
+   *
+   * 1枚ずつ順番に送るのは、表示順を選んだ順のまま保つため。
+   * サーバーは送られてきた時点の末尾に並べるので、同時に送ると前後が入れ替わることがある。
+   * 待ち時間を減らすため、1枚を送っている間に次の1枚を縮めておく。
+   */
   async function upload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const form = new FormData();
-    for (const file of Array.from(files)) form.append("images", file);
-
+    const list = Array.from(files);
     setError("");
     setMessage("");
+
+    if (list.length > MAX_FILES) {
+      setError(`一度にアップロードできるのは${MAX_FILES}枚までです。`);
+      if (fileRef.current) fileRef.current.value = "";
+      return;
+    }
+
     setBusy("upload");
+    let uploaded = 0;
+    let failed = 0;
+    let firstError = "";
+
     try {
-      const res = await fetch("/api/admin/gallery", { method: "POST", body: form });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setError(data.error ?? "アップロードできませんでした。");
+      let next = shrinkImage(list[0]);
+      for (let i = 0; i < list.length; i += 1) {
+        setProgress(`${i + 1}／${list.length}枚目`);
+        const file = await next;
+        if (i + 1 < list.length) next = shrinkImage(list[i + 1]);
+
+        const form = new FormData();
+        form.append("images", file);
+
+        try {
+          const res = await fetch("/api/admin/gallery", { method: "POST", body: form });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok) {
+            uploaded += typeof data.uploaded === "number" ? data.uploaded : 1;
+            failed += typeof data.failed === "number" ? data.failed : 0;
+          } else {
+            failed += 1;
+            if (!firstError) {
+              firstError = uploadErrorMessage(res.status, data, "アップロードできませんでした。");
+            }
+          }
+        } catch {
+          failed += 1;
+          if (!firstError) firstError = "通信に失敗しました。";
+        }
+      }
+
+      if (uploaded === 0) {
+        setError(firstError || "アップロードできませんでした。");
         return;
       }
       setMessage(
-        data.failed > 0
-          ? `${data.uploaded}枚を追加しました（${data.failed}枚は失敗しました）。`
-          : `${data.uploaded}枚を追加しました。`
+        failed > 0
+          ? `${uploaded}枚を追加しました（${failed}枚は失敗しました${
+              firstError ? `：${firstError}` : ""
+            }）。`
+          : `${uploaded}枚を追加しました。`
       );
       router.refresh();
-    } catch {
-      setError("通信に失敗しました。");
     } finally {
       setBusy(null);
+      setProgress("");
       if (fileRef.current) fileRef.current.value = "";
     }
   }
@@ -255,10 +307,15 @@ export default function GalleryManager({ images }: { images: GalleryRow[] }) {
           disabled={busy === "upload"}
         />
         <p className={styles.hint}>
-          JPEG・PNG・WebP、1枚5MBまで。一度に20枚まで選べます。追加した写真は末尾に並びます。
+          JPEG・PNG・WebP、一度に{MAX_FILES}枚まで選べます。大きな写真は送る前に自動で縮めます。
+          追加した写真は末尾に並びます。
           写真をつかんで動かすと並び替えでき、離した時点で保存されます。
         </p>
-        {busy === "upload" && <p className={styles.hint}>アップロードしています…</p>}
+        {busy === "upload" && (
+          <p className={styles.hint}>
+            アップロードしています…{progress && `（${progress}）`}
+          </p>
+        )}
         {message && <p className={styles.hint}>{message}</p>}
       </div>
 

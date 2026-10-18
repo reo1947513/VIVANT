@@ -10,6 +10,10 @@ import { deleteImage, uploadImage, UploadError } from "../../../lib/upload";
  * まとめて送れるようにしているのは、店内写真は一度に何枚も入れ替えることが多いため。
  * 途中の1枚が失敗しても、成功した分はそのまま登録する（全部やり直しにしない）。
  * 失敗した枚数だけを画面に伝える。
+ *
+ * ただし管理画面からは1枚ずつ送っている。本番の置き場所（Vercel）は1回の送信で
+ * 約4.5MBまでしか受け取れず、複数枚をまとめるとすぐに超えるため
+ * （詳しくは app/lib/clientImage.ts）。まとめて受け取る作りはそのまま残している。
  */
 export async function GET() {
   const denied = await requireAdminApi();

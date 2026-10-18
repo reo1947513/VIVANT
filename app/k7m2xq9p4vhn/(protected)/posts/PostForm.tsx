@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "../../admin.module.css";
 import { adminPath } from "../../../lib/adminPath";
+import { shrinkImage, uploadErrorMessage } from "../../../lib/clientImage";
 
 /**
  * 記事の作成・編集フォーム。
@@ -75,15 +76,16 @@ export default function PostForm({ initial }: { initial: PostFormValues }) {
 
   async function uploadCover(postId: string): Promise<boolean> {
     if (!file) return true;
+    // 送れる量に上限があるため、大きな画像は送る前に縮める（app/lib/clientImage.ts）
     const form = new FormData();
-    form.append("cover", file);
+    form.append("cover", await shrinkImage(file));
     const res = await fetch(`/api/admin/posts/${postId}/cover`, {
       method: "POST",
       body: form,
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "カバー画像を保存できませんでした。");
+      setError(uploadErrorMessage(res.status, data, "カバー画像を保存できませんでした。"));
       return false;
     }
     return true;
@@ -232,7 +234,7 @@ export default function PostForm({ initial }: { initial: PostFormValues }) {
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />
           <span className={styles.hint}>
-            JPEG・PNG・WebP、5MBまで。横長（横16：縦9程度）がきれいに表示されます。
+            JPEG・PNG・WebP。大きな画像は送る前に自動で縮めます。横長（横16：縦9程度）がきれいに表示されます。
           </span>
           {isEdit && coverUrl && (
             <div style={{ marginTop: 10 }}>
