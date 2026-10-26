@@ -1,12 +1,13 @@
-> ## ⚠ 公開ステータス：仮公開中（要差し替え）
+> ## ⚠ 公開ステータス：仮公開中
 >
-> BAR VIVANT LP は本番（`vivant-kappa.vercel.app` / `main`）に **仮公開中** です。本公開は実写真が揃い次第。
+> BAR VIVANT LP は本番（`vivant-kappa.vercel.app` / `main`）に **仮公開中** です。
 >
-> - **キャスト写真**：開発確認用の **デモ画像（AI生成・実在しません）**。本番前に実在・本人同意済みの実写真へ差し替え必須。
+> - **キャスト写真**：実在キャストの実写真を掲載済み（2026-10-27 時点：ことね・りあ・ゆき・あゆ）。AI生成などのデモ画像は使っていない。
+>   写真はコードではなく Supabase で管理しており、追加・差し替え・削除は管理画面のキャスト管理から行う。
+> - **ギャラリー**：店内写真とキャストの撮影写真を掲載。管理画面のギャラリーから管理する。
 > - **キャストの一言**：仮公開中は **表示オフ**（`app/components/CastCarousel.tsx` の `TEMP_HIDE_CWORD = true`）。
 > - **検索インデックス**：**noindex, nofollow** を設定中（`app/layout.tsx` の `metadata.robots`）。
-> - **未完了（＝本公開時にやること）**：①実写真へ差し替え ②`TEMP_HIDE_CWORD` を `false` に ③`metadata.robots` の noindex を解除。
-> - 詳細・手順：`public/images/cast/README.txt` を参照。
+> - **未完了（＝本公開時にやること）**：①`TEMP_HIDE_CWORD` を `false` に ②`metadata.robots` の noindex を解除。
 >
 > 出勤情報・ブログ・キャストログイン（Supabase連携）は次段階で実装予定。
 
